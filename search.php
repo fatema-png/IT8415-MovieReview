@@ -1,6 +1,6 @@
 <?php
-require_once 'includes/db.php';
-require_once 'includes/auth.php';
+require_once 'db.php';
+require_once 'auth.php';
 
 // ---------- Input sanitization ----------
 $search_title   = trim($_GET['title']   ?? '');
@@ -131,53 +131,262 @@ $any_search = $search_title || $search_creator || $date_from || $date_to || $gen
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Movie Reviews</title>
     <!-- Link to Member 4's stylesheet -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        /* Search page styles - to be integrated with Member 4's design */
-        .search-container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-        .search-form { background: #1e1e2e; border-radius: 10px; padding: 24px; margin-bottom: 30px; }
-        .form-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
-        .form-group { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { color: #ccc; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
-        .form-group input, .form-group select {
-            padding: 10px 14px; border-radius: 6px; border: 1px solid #444;
-            background: #2a2a3e; color: #fff; font-size: 0.95rem;
+    .search-container{
+        max-width:1100px;
+        margin:40px auto;
+        padding:0 20px;
+    }
+
+    .search-title{
+        color:#fff;
+        font-size:2.2rem;
+        font-weight:700;
+        margin-bottom:24px;
+    }
+
+    .search-form{
+        background:#111827;
+        border-radius:14px;
+        padding:24px;
+        margin-bottom:30px;
+        box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .form-row{
+        display:flex;
+        flex-wrap:wrap;
+        gap:16px;
+        margin-bottom:16px;
+    }
+
+    .form-group{
+        flex:1;
+        min-width:180px;
+        display:flex;
+        flex-direction:column;
+        gap:6px;
+    }
+
+    .form-group label{
+        color:#d1d5db;
+        font-size:0.82rem;
+        font-weight:600;
+        text-transform:uppercase;
+    }
+
+    .form-group input,
+    .form-group select{
+        padding:10px 14px;
+        border-radius:8px;
+        border:1px solid #374151;
+        background:#1f2937;
+        color:#fff;
+        font-size:0.95rem;
+        outline:none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus{
+        border-color:#ef4444;
+        box-shadow:0 0 0 2px rgba(239,68,68,0.15);
+    }
+
+    .btn-search{
+        background:#ef4444;
+        color:#fff;
+        border:none;
+        padding:11px 28px;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:1rem;
+        font-weight:600;
+        transition:0.2s ease;
+    }
+
+    .btn-search:hover{
+        background:#dc2626;
+    }
+
+    .results-header{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:18px;
+        color:#9ca3af;
+        font-size:0.95rem;
+    }
+
+    .movie-card{
+        display:flex;
+        gap:20px;
+        background:#111827;
+        border-radius:14px;
+        padding:16px;
+        margin-bottom:18px;
+        box-shadow:0 8px 24px rgba(0,0,0,0.35);
+        transition:0.2s ease;
+    }
+
+    .movie-card:hover{
+        transform:translateY(-3px) scale(1.01);
+    }
+
+    .movie-thumb{
+        width:100px;
+        height:140px;
+        object-fit:cover;
+        border-radius:10px;
+        flex-shrink:0;
+        background:#1f2937;
+    }
+
+    .movie-thumb-placeholder{
+        width:100px;
+        height:140px;
+        border-radius:10px;
+        background:#1f2937;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:#6b7280;
+        font-size:2rem;
+        flex-shrink:0;
+    }
+
+    .movie-info{
+        flex:1;
+    }
+
+    .movie-title{
+        font-size:1.25rem;
+        font-weight:700;
+        color:#fff;
+        text-decoration:none;
+    }
+
+    .movie-title:hover{
+        color:#ef4444;
+    }
+
+    .movie-meta{
+        font-size:0.85rem;
+        color:#9ca3af;
+        margin:8px 0;
+    }
+
+    .movie-meta span{
+        margin-right:14px;
+    }
+
+    .movie-desc{
+        color:#d1d5db;
+        font-size:0.94rem;
+        margin:8px 0;
+    }
+
+    .stars{
+        color:#f5c518;
+    }
+
+    .badge{
+        display:inline-block;
+        background:#1f2937;
+        border:1px solid #374151;
+        color:#d1d5db;
+        font-size:0.75rem;
+        padding:2px 8px;
+        border-radius:12px;
+        margin-right:6px;
+    }
+
+    .btn-view{
+        display:inline-block;
+        margin-top:10px;
+        background:#ef4444;
+        color:#fff;
+        padding:8px 18px;
+        border-radius:8px;
+        text-decoration:none;
+        font-size:0.88rem;
+        font-weight:600;
+        transition:0.2s ease;
+    }
+
+    .btn-view:hover{
+        background:#dc2626;
+        color:#fff;
+    }
+
+    .pagination{
+        display:flex;
+        gap:8px;
+        justify-content:center;
+        margin-top:30px;
+        flex-wrap:wrap;
+    }
+
+    .pagination a,
+    .pagination span{
+        padding:8px 14px;
+        border-radius:8px;
+        border:1px solid #374151;
+        color:#d1d5db;
+        text-decoration:none;
+        font-size:0.9rem;
+        background:#111827;
+    }
+
+    .pagination a:hover{
+        background:#ef4444;
+        border-color:#ef4444;
+        color:#fff;
+    }
+
+    .pagination .active{
+        background:#ef4444;
+        border-color:#ef4444;
+        color:#fff;
+    }
+
+    .no-results{
+        text-align:center;
+        color:#9ca3af;
+        padding:60px 0;
+        background:#111827;
+        border-radius:14px;
+        box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .no-results .icon{
+        font-size:3rem;
+        margin-bottom:10px;
+    }
+
+    @media (max-width: 768px){
+        .search-title{
+            font-size:1.8rem;
         }
-        .btn-search {
-            background: #e50914; color: #fff; border: none;
-            padding: 11px 28px; border-radius: 6px; cursor: pointer;
-            font-size: 1rem; font-weight: 600; transition: background 0.2s;
+
+        .movie-card{
+            flex-direction:column;
         }
-        .btn-search:hover { background: #b0060f; }
-        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; color: #ccc; }
-        .movie-card {
-            display: flex; gap: 20px; background: #1e1e2e;
-            border-radius: 10px; padding: 16px; margin-bottom: 16px;
-            transition: transform 0.15s;
+
+        .movie-thumb,
+        .movie-thumb-placeholder{
+            width:100%;
+            height:220px;
         }
-        .movie-card:hover { transform: translateY(-2px); }
-        .movie-thumb { width: 100px; height: 140px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #333; }
-        .movie-thumb-placeholder { width: 100px; height: 140px; border-radius: 6px; background: #2a2a3e; display: flex; align-items: center; justify-content: center; color: #555; font-size: 2rem; flex-shrink: 0; }
-        .movie-info { flex: 1; }
-        .movie-title { font-size: 1.2rem; font-weight: 700; color: #fff; text-decoration: none; }
-        .movie-title:hover { color: #e50914; }
-        .movie-meta { font-size: 0.82rem; color: #999; margin: 6px 0; }
-        .movie-meta span { margin-right: 14px; }
-        .movie-desc { color: #bbb; font-size: 0.93rem; margin: 8px 0; }
-        .stars { color: #f5c518; }
-        .badge { display: inline-block; background: #2a2a3e; border: 1px solid #444; color: #ccc; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; margin-right: 6px; }
-        .btn-view { display: inline-block; margin-top: 10px; background: #e50914; color: #fff; padding: 7px 18px; border-radius: 5px; text-decoration: none; font-size: 0.88rem; font-weight: 600; }
-        .btn-view:hover { background: #b0060f; }
-        .pagination { display: flex; gap: 8px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
-        .pagination a, .pagination span {
-            padding: 8px 14px; border-radius: 6px; border: 1px solid #444; color: #ccc;
-            text-decoration: none; font-size: 0.9rem;
+
+        .results-header{
+            flex-direction:column;
+            align-items:flex-start;
+            gap:8px;
         }
-        .pagination a:hover { background: #e50914; border-color: #e50914; color: #fff; }
-        .pagination .active { background: #e50914; border-color: #e50914; color: #fff; }
-        .no-results { text-align: center; color: #888; padding: 60px 0; }
-        .no-results .icon { font-size: 3rem; }
-    </style>
+    }
+</style>
 </head>
 <body>
     <?php include 'includes/navbar.php'; // Member 4's nav ?>
@@ -188,12 +397,14 @@ $any_search = $search_title || $search_creator || $date_from || $date_to || $gen
         <!-- Search Form -->
         <form class="search-form" method="GET" action="search.php" id="searchForm">
             <div class="form-row">
-                <div class="form-group" style="flex:2; min-width:240px;">
-                    <label for="title">Movie Title</label>
-                    <input type="text" id="title" name="title"
-                           placeholder="Search by title or keyword..."
-                           value="<?= htmlspecialchars($search_title) ?>">
-                </div>
+                <div class="form-group suggestion-wrapper" style="flex:2; min-width:240px;">
+					<label for="title">Movie Title</label>
+					<input type="text" id="title" name="title"
+					placeholder="Search by title or keyword..."
+					autocomplete="off"
+					value="<?= htmlspecialchars($search_title) ?>">
+				<div id="suggestions"></div>
+				</div>
                 <div class="form-group">
                     <label for="creator">Critic / Creator</label>
                     <input type="text" id="creator" name="creator"
@@ -346,5 +557,57 @@ $any_search = $search_title || $search_creator || $date_from || $date_to || $gen
             }
         });
     </script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	
+	<script>
+const titleInput = document.getElementById('title');
+const suggestionsBox = document.getElementById('suggestions');
+
+titleInput.addEventListener('input', async function () {
+    const query = this.value.trim();
+
+    if (query.length === 0) {
+        suggestionsBox.innerHTML = '';
+        return;
+    }
+
+    try {
+        const response = await fetch(`search_suggestions.php?q=${encodeURIComponent(query)}`);
+        const movies = await response.json();
+
+        if (!movies.length) {
+            suggestionsBox.innerHTML = '';
+            return;
+        }
+
+        let html = '<div class="suggestion-list">';
+        movies.forEach(movie => {
+            html += `
+                <div class="suggestion-item" data-id="${movie.movie_id}" data-title="${movie.title}">
+                    ${movie.title}
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        suggestionsBox.innerHTML = html;
+
+        document.querySelectorAll('.suggestion-item').forEach(item => {
+            item.addEventListener('click', function () {
+                titleInput.value = this.dataset.title;
+                suggestionsBox.innerHTML = '';
+            });
+        });
+    } catch (error) {
+        suggestionsBox.innerHTML = '';
+    }
+});
+
+document.addEventListener('click', function(e) {
+    if (!suggestionsBox.contains(e.target) && e.target !== titleInput) {
+        suggestionsBox.innerHTML = '';
+    }
+});
+</script>
 </body>
 </html>
