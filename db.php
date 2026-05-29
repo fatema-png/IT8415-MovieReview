@@ -1,9 +1,8 @@
 <?php
-// Database connection - shared across all Member 5 files
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'movies');
+define('DB_NAME', 'dbproj_movies');
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 

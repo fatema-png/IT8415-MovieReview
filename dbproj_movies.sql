@@ -25,6 +25,7 @@ DELIMITER $$
 --
 -- Procedures
 --
+<<<<<<< HEAD
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPopularMoviesByDateRange` (IN `start_date` DATE, IN `end_date` DATE)   BEGIN
     SELECT 
         m.movie_id,
@@ -45,6 +46,28 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPopularMoviesByDateRange` (IN `s
       AND DATE(m.created_at) BETWEEN start_date AND end_date
     GROUP BY m.movie_id
     ORDER BY m.view_count DESC, avg_rating DESC;
+=======
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPopularMoviesByDateRange` (IN `start_date` DATE, IN `end_date` DATE)   BEGIN
+    SELECT 
+        m.movie_id,
+        m.title,
+        g.genre_name,
+        u.username AS reviewer,
+        m.view_count,
+        ROUND(AVG(r.rating_value), 1) AS avg_rating,
+        COUNT(DISTINCT r.rating_id) AS total_ratings,
+        COUNT(DISTINCT c.comment_id) AS total_comments,
+        m.created_at
+    FROM dbProj_movies m
+    JOIN dbProj_users u ON m.user_id = u.user_id
+    LEFT JOIN dbProj_genres g ON m.genre_id = g.genre_id
+    LEFT JOIN dbProj_ratings r ON m.movie_id = r.movie_id
+    LEFT JOIN dbProj_comments c ON m.movie_id = c.movie_id
+    WHERE m.status = 'published'
+      AND DATE(m.created_at) BETWEEN start_date AND end_date
+    GROUP BY m.movie_id
+    ORDER BY m.view_count DESC, avg_rating DESC;
+>>>>>>> 663c66c (member 3 work CRUD)
 END$$
 
 DELIMITER ;
@@ -169,8 +192,13 @@ INSERT INTO `dbproj_movies` (`movie_id`, `user_id`, `genre_id`, `title`, `descri
 -- Triggers `dbproj_movies`
 --
 DELIMITER $$
+<<<<<<< HEAD
 CREATE TRIGGER `before_movie_update` BEFORE UPDATE ON `dbproj_movies` FOR EACH ROW BEGIN
     SET NEW.updated_at = NOW();
+=======
+CREATE TRIGGER `before_movie_update` BEFORE UPDATE ON `dbproj_movies` FOR EACH ROW BEGIN
+    SET NEW.updated_at = NOW();
+>>>>>>> 663c66c (member 3 work CRUD)
 END
 $$
 DELIMITER ;
