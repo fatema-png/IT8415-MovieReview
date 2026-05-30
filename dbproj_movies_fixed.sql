@@ -1,79 +1,7 @@
-﻿-- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Apr 08, 2026 at 10:40 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+﻿SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
+SET time_zone = '+00:00';
+SET NAMES utf8mb4;
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `dbproj_movies`
---
-
-DELIMITER $$
---
--- Procedures
---
-CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPopularMoviesByDateRange` (IN `start_date` DATE, IN `end_date` DATE)   BEGIN
-    SELECT 
-        m.movie_id,
-        m.title,
-        g.genre_name,
-        u.username AS reviewer,
-        m.view_count,
-        ROUND(AVG(r.rating_value), 1) AS avg_rating,
-        COUNT(DISTINCT r.rating_id) AS total_ratings,
-        COUNT(DISTINCT c.comment_id) AS total_comments,
-        m.created_at
-    FROM dbProj_movies m
-    JOIN dbProj_users u ON m.user_id = u.user_id
-    LEFT JOIN dbProj_genres g ON m.genre_id = g.genre_id
-    LEFT JOIN dbProj_ratings r ON m.movie_id = r.movie_id
-    LEFT JOIN dbProj_comments c ON m.movie_id = c.movie_id
-    WHERE m.status = 'published'
-      AND DATE(m.created_at) BETWEEN start_date AND end_date
-    GROUP BY m.movie_id
-    ORDER BY m.view_count DESC, avg_rating DESC;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPopularMoviesByDateRange` (IN `start_date` DATE, IN `end_date` DATE)   BEGIN
-    SELECT 
-        m.movie_id,
-        m.title,
-        g.genre_name,
-        u.username AS reviewer,
-        m.view_count,
-        ROUND(AVG(r.rating_value), 1) AS avg_rating,
-        COUNT(DISTINCT r.rating_id) AS total_ratings,
-        COUNT(DISTINCT c.comment_id) AS total_comments,
-        m.created_at
-    FROM dbProj_movies m
-    JOIN dbProj_users u ON m.user_id = u.user_id
-    LEFT JOIN dbProj_genres g ON m.genre_id = g.genre_id
-    LEFT JOIN dbProj_ratings r ON m.movie_id = r.movie_id
-    LEFT JOIN dbProj_comments c ON m.movie_id = c.movie_id
-    WHERE m.status = 'published'
-      AND DATE(m.created_at) BETWEEN start_date AND end_date
-    GROUP BY m.movie_id
-    ORDER BY m.view_count DESC, avg_rating DESC;
-END$$
-
-DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `dbproj_comments`
---
 
 CREATE TABLE `dbproj_comments` (
   `comment_id` int(11) NOT NULL,
@@ -189,8 +117,6 @@ INSERT INTO `dbproj_movies` (`movie_id`, `user_id`, `genre_id`, `title`, `descri
 -- Triggers `dbproj_movies`
 --
 DELIMITER $$
-CREATE TRIGGER `before_movie_update` BEFORE UPDATE ON `dbproj_movies` FOR EACH ROW BEGIN
-    SET NEW.updated_at = NOW();
 CREATE TRIGGER `before_movie_update` BEFORE UPDATE ON `dbproj_movies` FOR EACH ROW BEGIN
     SET NEW.updated_at = NOW();
 END
