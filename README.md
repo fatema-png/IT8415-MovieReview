@@ -12,8 +12,22 @@ browse, search, rate and review movies. Built for the IT8415 group project.
    the trigger, and the demo data.
 4. Visit `http://localhost/IT8415-MovieReview/`.
 
-The database settings are in `db.php` (host `localhost`, user `root`, no password —
-the XAMPP defaults). Change them there if your setup is different.
+The database settings are in `db.php`. It **auto-detects the environment**: on local
+XAMPP it uses host `localhost`, user `root`, no password and the `dbproj_movies`
+database; on the deployment server it switches to the production credentials and the
+`db202102192` database. No manual editing is needed when moving between the two.
+
+## Live deployment
+
+The site is deployed on the course server (Apache 2.4 / Ubuntu, PHP 8.2):
+
+- **URL:** `http://20.74.143.233/~u202102192/`
+- **Upload:** via SFTP to `/home/u202102192/public_html/` (NetBeans → Run As → *Remote Web Site (SFTP)*).
+- **Database:** `db202102192`, managed through phpMyAdmin at `http://20.74.143.233/phpmyadmin/`.
+- **Credentials:** the production MySQL user/password are set in `db.php` (kept out of this
+  README). They are separate from the SFTP login.
+
+To redeploy after a change: upload the changed files over SFTP, then reload the URL above.
 
 ## Demo accounts
 
