@@ -69,7 +69,7 @@ save as draft, then publish, and view own content.
 2. All content created by a chosen user.
 
 **Database**
-- ERD: `NwERD.png`
+- ERD: `finalERD.png`
 - Stored procedure: `GetPopularMoviesByDateRange` (in `database.sql`)
 - Trigger: `before_movie_update` (in `database.sql`)
 - 3 roles, 16 movies, media, ratings, comments — well above the 15-record minimum,
