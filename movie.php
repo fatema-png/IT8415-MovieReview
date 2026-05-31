@@ -13,6 +13,8 @@ $sql = "
         m.movie_id,
         m.title,
         m.description,
+        m.full_review,
+        m.trailer_url,
         m.release_year,
         m.view_count,
         m.created_at,
@@ -229,6 +231,24 @@ $movie['view_count']++;
                 </div>
             </div>
         </div>
+
+        <?php if (!empty($movie['full_review'])): ?>
+            <div class="detail-description" style="margin-top:24px;">
+                <h3 style="color:#fff; font-size:1.2rem; margin-bottom:10px;">Full Review</h3>
+                <?= nl2br(htmlspecialchars($movie['full_review'])) ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Trailer (a video media file for this movie) -->
+        <?php if (!empty($movie['trailer_url'])): ?>
+            <div style="margin-top:28px;">
+                <h3 style="color:#fff; font-size:1.2rem; margin-bottom:12px;">🎬 Trailer</h3>
+                <div class="ratio ratio-16x9" style="max-width:720px; border-radius:14px; overflow:hidden;">
+                    <iframe src="<?= htmlspecialchars($movie['trailer_url']) ?>"
+                            title="Movie trailer" allowfullscreen></iframe>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <?php include __DIR__ . '/comments_section.php'; ?>

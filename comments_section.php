@@ -8,8 +8,8 @@
  *   include 'comments_section.php';
  *
  * Requires:
- *   - includes/db.php already included
- *   - includes/auth.php already included
+ *   - db.php already included (gives us $conn)
+ *   - auth.php already included (gives us the login helper functions)
  */
 
 if (!isset($movie_id) || !isset($conn)) {

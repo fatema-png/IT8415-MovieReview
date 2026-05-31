@@ -3,8 +3,8 @@
  * ajax/delete_comment.php
  * AJAX endpoint: POST only. Admin-only. Returns JSON.
  */
-require_once '../includes/db.php';
-require_once '../includes/auth.php';
+require_once '../db.php';
+require_once '../auth.php';
 
 header('Content-Type: application/json');
 

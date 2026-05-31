@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth.php';
 ?>
@@ -75,7 +75,10 @@ require_once __DIR__ . '/auth.php';
                 m.description,
                 m.release_year,
                 g.genre_name,
-                ROUND(AVG(r.rating_value), 1) AS avg_rating
+                ROUND(AVG(r.rating_value), 1) AS avg_rating,
+                (SELECT med.file_path FROM dbproj_media med
+                 WHERE med.movie_id = m.movie_id AND med.file_type = 'image'
+                 LIMIT 1) AS thumbnail
             FROM dbproj_movies m
             LEFT JOIN dbproj_genres g ON m.genre_id = g.genre_id
             LEFT JOIN dbproj_ratings r ON m.movie_id = r.movie_id
@@ -90,7 +93,13 @@ require_once __DIR__ . '/auth.php';
         while ($row = mysqli_fetch_assoc($result)) {
         ?>
             <div class="col-md-6 mb-4">
-                <div class="movie-card h-100">
+                <div class="movie-card h-100 d-flex gap-3">
+                    <?php if (!empty($row['thumbnail'])): ?>
+                        <img src="<?= htmlspecialchars($row['thumbnail']) ?>"
+                             alt="<?= htmlspecialchars($row['title']) ?> poster"
+                             style="width:90px; height:130px; object-fit:cover; border-radius:8px; flex-shrink:0;">
+                    <?php endif; ?>
+                    <div class="flex-grow-1">
                     <div class="movie-title">
                         <?= htmlspecialchars($row['title']) ?>
                     </div>
@@ -116,6 +125,7 @@ require_once __DIR__ . '/auth.php';
                             View Review
                         </a>
                     </div>
+                    </div><!-- /flex-grow-1 -->
                 </div>
             </div>
         <?php } ?>

@@ -563,6 +563,13 @@ $any_search = $search_title || $search_creator || $date_from || $date_to || $gen
 const titleInput = document.getElementById('title');
 const suggestionsBox = document.getElementById('suggestions');
 
+// Escape user/creator-controlled text before putting it in the DOM (prevents XSS).
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+}
+
 titleInput.addEventListener('input', async function () {
     const query = this.value.trim();
 
@@ -582,9 +589,10 @@ titleInput.addEventListener('input', async function () {
 
         let html = '<div class="suggestion-list">';
         movies.forEach(movie => {
+            const safeTitle = escapeHtml(movie.title);
             html += `
-                <div class="suggestion-item" data-id="${movie.movie_id}" data-title="${movie.title}">
-                    ${movie.title}
+                <div class="suggestion-item" data-id="${parseInt(movie.movie_id, 10)}" data-title="${safeTitle}">
+                    ${safeTitle}
                 </div>
             `;
         });

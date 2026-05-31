@@ -1,4 +1,4 @@
-﻿<nav class="navbar navbar-expand-lg navbar-dark" style="background:#111827;">
+<nav class="navbar navbar-expand-lg navbar-dark" style="background:#111827;">
   <div class="container">
 
     <a class="navbar-brand fw-bold" href="index.php">
@@ -20,6 +20,30 @@
           <a class="nav-link" href="search.php">Search</a>
         </li>
 
+        <?php
+        // Categories menu: list the genres so users can jump straight to a category.
+        if (isset($conn)):
+            $navGenres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY genre_name");
+            if ($navGenres && $navGenres->num_rows > 0):
+        ?>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="genreMenu" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="genreMenu">
+              <?php while ($g = $navGenres->fetch_assoc()): ?>
+                <li>
+                  <a class="dropdown-item" href="search.php?genre=<?= (int)$g['genre_id'] ?>">
+                    <?= htmlspecialchars($g['genre_name']) ?>
+                  </a>
+                </li>
+              <?php endwhile; ?>
+            </ul>
+          </li>
+        <?php
+            endif;
+        endif;
+        ?>
+
         <?php if (isLoggedIn()): ?>
 
           <?php if (isCreator() || isAdmin()): ?>
@@ -29,6 +53,12 @@
           <?php endif; ?>
 
           <?php if (isAdmin()): ?>
+            <li class="nav-item">
+              <a class="nav-link" href="admin_content.php">Moderate</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="admin_users.php">Users</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="admin_reports.php">Reports</a>
             </li>

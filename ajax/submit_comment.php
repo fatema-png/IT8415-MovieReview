@@ -4,8 +4,8 @@
  * AJAX endpoint: POST only. Returns JSON.
  * Called by movie.php via fetch()
  */
-require_once '../includes/db.php';
-require_once '../includes/auth.php';
+require_once '../db.php';
+require_once '../auth.php';
 
 header('Content-Type: application/json');
 

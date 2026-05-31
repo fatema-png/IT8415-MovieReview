@@ -5,8 +5,8 @@
  * Inserts or updates a rating (1–5 stars).
  * Uses UNIQUE KEY (movie_id, user_id) to prevent duplicate ratings.
  */
-require_once '../includes/db.php';
-require_once '../includes/auth.php';
+require_once '../db.php';
+require_once '../auth.php';
 
 header('Content-Type: application/json');
 

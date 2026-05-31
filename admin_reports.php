@@ -5,8 +5,8 @@
  *   Report 1: Most popular movies in a date range (uses stored procedure)
  *   Report 2: Content created by a specific user
  */
-require_once 'includes/db.php';
-require_once 'includes/auth.php';
+require_once 'db.php';
+require_once 'auth.php';
 
 requireAdmin(); // Redirect non-admins
 
@@ -26,6 +26,12 @@ if (!empty($r1_from) && !empty($r1_to)) {
         $stmt->execute();
         $r1_results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
+
+        // A stored procedure (CALL) leaves an extra empty result set behind.
+        // We clear it so the next query on this connection still works.
+        while ($conn->more_results()) {
+            $conn->next_result();
+        }
     }
 }
 
@@ -79,6 +85,7 @@ if ($r2_user_id > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Reports — Movie Reviews</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         body { background: #0d0d1a; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; }
@@ -324,5 +331,7 @@ if ($r2_user_id > 0) {
             <?php endif; ?>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

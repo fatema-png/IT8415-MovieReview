@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <?php if (!$success): ?>
-        <form method="POST" action="register.php">
+        <form method="POST" action="register.php" id="registerForm">
             <div class="mb-3">
                 <label class="form-label" for="username">Username</label>
                 <input type="text" id="username" name="username" class="form-control"
@@ -175,6 +175,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
+    <script>
+    // JavaScript validation before sending the register form
+    const form = document.getElementById('registerForm');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            const username = this.username.value.trim();
+            const email    = this.email.value.trim();
+            const password = this.password.value;
+            const confirm  = this.confirm.value;
+            const emailOk  = /^\S+@\S+\.\S+$/.test(email);
+
+            if (username.length < 3) {
+                e.preventDefault();
+                alert('Username must be at least 3 characters.');
+            } else if (!emailOk) {
+                e.preventDefault();
+                alert('Please enter a valid email address.');
+            } else if (password.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters.');
+            } else if (password !== confirm) {
+                e.preventDefault();
+                alert('The two passwords do not match.');
+            }
+        });
+    }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
