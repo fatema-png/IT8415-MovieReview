@@ -1,24 +1,16 @@
--- =============================================================
---  Movie Review System - Full Database
---  Import this single file in phpMyAdmin to set everything up.
+--  Movie Review - full database
+--  Import this in phpMyAdmin to set up.
 --
---  All tables use the fixed prefix:  dbproj_
 --
---  Demo login accounts (the password for ALL of them is: password)
---    admin@movies.com   -> Administrator
---    john@movies.com    -> Creator
---    sara@movies.com    -> Creator
---    mike@movies.com    -> Viewer
---    anna@movies.com    -> Viewer
+--  Demo accounts (THE PASSWORD FOR AL OF THEM IS: password)
+--    admin@movies.com   -> admin
+--    john@movies.com    -> creator
+--    sara@movies.com    -> creator
+--    mike@movies.com    -> viewer
+--    anna@movies.com    -> viewer
 -- =============================================================
 
-CREATE DATABASE IF NOT EXISTS `dbproj_movies`
-    DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `dbproj_movies`;
-
-SET FOREIGN_KEY_CHECKS = 0;
-
--- Drop old tables so the file can be re-imported cleanly
+-- Drop old tables so the file can be re imported cleanly
 DROP TABLE IF EXISTS `dbproj_comments`;
 DROP TABLE IF EXISTS `dbproj_ratings`;
 DROP TABLE IF EXISTS `dbproj_media`;
@@ -31,9 +23,9 @@ DROP PROCEDURE IF EXISTS `GetPopularMoviesByDateRange`;
 SET FOREIGN_KEY_CHECKS = 1;
 
 
--- ============================================================
+
 -- 1. ROLES  (the 3 user types)
--- ============================================================
+
 CREATE TABLE `dbproj_roles` (
     `role_id`   INT(11) NOT NULL AUTO_INCREMENT,
     `role_name` VARCHAR(50) NOT NULL,
@@ -47,10 +39,9 @@ INSERT INTO `dbproj_roles` (`role_id`, `role_name`) VALUES
 (3, 'Viewer');
 
 
--- ============================================================
+
 -- 2. USERS
 -- The password hash below is bcrypt for the word "password".
--- ============================================================
 CREATE TABLE `dbproj_users` (
     `user_id`    INT(11) NOT NULL AUTO_INCREMENT,
     `username`   VARCHAR(100) NOT NULL,
@@ -74,9 +65,8 @@ INSERT INTO `dbproj_users` (`user_id`, `username`, `email`, `password`, `role_id
 (5, 'viewer_anna', 'anna@movies.com',  '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 3, '2026-04-08 23:37:29');
 
 
--- ============================================================
+
 -- 3. GENRES  (categories)
--- ============================================================
 CREATE TABLE `dbproj_genres` (
     `genre_id`   INT(11) NOT NULL AUTO_INCREMENT,
     `genre_name` VARCHAR(100) NOT NULL,
@@ -94,9 +84,7 @@ INSERT INTO `dbproj_genres` (`genre_id`, `genre_name`) VALUES
 (7, 'Animation');
 
 
--- ============================================================
 -- 4. MOVIES  (the main content)
--- ============================================================
 CREATE TABLE `dbproj_movies` (
     `movie_id`     INT(11) NOT NULL AUTO_INCREMENT,
     `user_id`      INT(11) NOT NULL,
@@ -120,8 +108,7 @@ CREATE TABLE `dbproj_movies` (
     CONSTRAINT `fk_movies_genre` FOREIGN KEY (`genre_id`) REFERENCES `dbproj_genres` (`genre_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- created_at values are spread across several weeks so the "newest first"
--- ordering and the date-range report are clearly visible in the demo.
+-- created_at values are spread across several weeks so the newest are first
 INSERT INTO `dbproj_movies`
 (`movie_id`, `user_id`, `genre_id`, `title`, `description`, `full_review`, `release_year`, `trailer_url`, `status`, `view_count`, `created_at`, `updated_at`) VALUES
 (1,  2, 5, 'Inception',                          'A mind-bending heist thriller set inside dreams.',        'Christopher Nolan builds a layered world where thieves steal ideas from the subconscious. Stunning visuals and a clever script make this a modern classic.', '2010', 'https://www.youtube.com/embed/YoHD9XEInc0', 'published', 522, '2026-02-03 10:15:00', NULL),
@@ -143,10 +130,8 @@ INSERT INTO `dbproj_movies`
 (16, 2, 1, 'John Wick',                           'A stylish revenge action thriller.',                      'This review is still a work in progress and has not been published yet.', '2014', NULL, 'draft', 0, '2026-05-16 09:30:00', NULL);
 
 
--- ============================================================
 -- 5. MEDIA  (images + video trailers for each movie)
 --    Each published movie has at least one image.
--- ============================================================
 CREATE TABLE `dbproj_media` (
     `media_id`    INT(11) NOT NULL AUTO_INCREMENT,
     `movie_id`    INT(11) NOT NULL,
@@ -159,7 +144,7 @@ CREATE TABLE `dbproj_media` (
         REFERENCES `dbproj_movies` (`movie_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Posters are stored as external image URLs (no local uploads folder needed).
+-- Posters are stored as image URLs (because doing file uploads was a mess for us).
 INSERT INTO `dbproj_media` (`movie_id`, `file_path`, `file_type`) VALUES
 (1,  'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg',                                            'image'),
 (2,  'https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_.jpg',                            'image'),
@@ -178,9 +163,7 @@ INSERT INTO `dbproj_media` (`movie_id`, `file_path`, `file_type`) VALUES
 (15, 'https://upload.wikimedia.org/wikipedia/en/4/4a/Oppenheimer_%28film%29.jpg',                                                               'image');
 
 
--- ============================================================
 -- 6. RATINGS  (1 to 5 stars, one per user per movie)
--- ============================================================
 CREATE TABLE `dbproj_ratings` (
     `rating_id`    INT(11) NOT NULL AUTO_INCREMENT,
     `movie_id`     INT(11) NOT NULL,
@@ -204,9 +187,7 @@ INSERT INTO `dbproj_ratings` (`movie_id`, `user_id`, `rating_value`) VALUES
 (10, 5, 5);
 
 
--- ============================================================
 -- 7. COMMENTS
--- ============================================================
 CREATE TABLE `dbproj_comments` (
     `comment_id`   INT(11) NOT NULL AUTO_INCREMENT,
     `movie_id`     INT(11) NOT NULL,
@@ -228,12 +209,10 @@ INSERT INTO `dbproj_comments` (`movie_id`, `user_id`, `comment_text`) VALUES
 (9, 4, 'Parasite deserved every Oscar it won.');
 
 
--- ============================================================
 -- 8. STORED PROCEDURE
 --    Used by the admin "Most Popular Movies" report.
 --    Returns published movies created between two dates,
 --    ordered by views and average rating.
--- ============================================================
 DELIMITER $$
 CREATE PROCEDURE `GetPopularMoviesByDateRange`(IN `start_date` DATE, IN `end_date` DATE)
 BEGIN
@@ -260,10 +239,8 @@ END$$
 DELIMITER ;
 
 
--- ============================================================
 -- 9. TRIGGER
 --    Automatically refresh updated_at whenever a movie changes.
--- ============================================================
 DELIMITER $$
 CREATE TRIGGER `before_movie_update`
 BEFORE UPDATE ON `dbproj_movies`

@@ -335,7 +335,7 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
                     </select>
                 </div>
                 <div class="form-group" style="justify-content:flex-end; padding-top:22px;">
-                    <button type="submit" class="btn-search">Search</button>
+                    <button type="button" id="clearBtn" class="btn-search">Clear</button>
                 </div>
             </div>
         </form>
@@ -391,13 +391,21 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
         searchTimer = setTimeout(runSearch, 300);
     });
 
-    // Clicking "Search" (or pressing Enter) searches immediately, no reload.
+    // Pressing Enter searches immediately (no reload); results otherwise update live.
     searchForm.addEventListener('submit', (e) => {
         e.preventDefault();
         if (fromInput.value && toInput.value && fromInput.value > toInput.value) {
             alert('Error: "From Date" cannot be after "To Date".');
             return;
         }
+        clearTimeout(searchTimer);
+        runSearch();
+    });
+
+    // "Clear" empties all filters and shows the full list again.
+    document.getElementById('clearBtn').addEventListener('click', () => {
+        searchForm.reset();
+        document.getElementById('suggestions').innerHTML = '';
         clearTimeout(searchTimer);
         runSearch();
     });
