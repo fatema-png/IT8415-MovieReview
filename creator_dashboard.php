@@ -43,6 +43,10 @@ $messages = [
     'deleted' => 'The review was deleted.',
 ];
 $msg = $messages[$_GET['msg'] ?? ''] ?? '';
+
+// An optional image-upload warning passed from save_post.php / update_post.php.
+// The review itself was saved; only the poster image had a problem.
+$imgError = trim($_GET['imgerror'] ?? '');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -64,6 +68,13 @@ $msg = $messages[$_GET['msg'] ?? ''] ?? '';
 
     <?php if ($msg): ?>
         <div class="alert alert-success"><?= htmlspecialchars($msg) ?></div>
+    <?php endif; ?>
+
+    <?php if ($imgError): ?>
+        <div class="alert alert-warning">
+            ⚠ <?= htmlspecialchars($imgError) ?>
+            You can add the poster by editing the review.
+        </div>
     <?php endif; ?>
 
     <?php if (empty($movies)): ?>

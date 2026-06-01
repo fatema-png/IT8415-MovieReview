@@ -56,7 +56,7 @@ $imgStmt->close();
     <div class="card-dark">
         <h2 class="mb-4">✏️ Edit Movie Review</h2>
 
-        <form action="update_post.php" method="POST" enctype="multipart/form-data" id="postForm">
+        <form action="update_post.php" method="POST" id="postForm">
             <input type="hidden" name="movie_id" value="<?= $movie['movie_id'] ?>">
 
             <div class="mb-3">
@@ -103,14 +103,20 @@ $imgStmt->close();
             </div>
 
             <div class="mb-4">
-                <label class="form-label">Poster Image</label>
+                <label class="form-label">Poster Image URL</label>
                 <?php if ($currentImage): ?>
                     <div class="mb-2">
                         <img src="<?= htmlspecialchars($currentImage) ?>" alt="current poster"
                              style="height:120px; border-radius:8px;">
                     </div>
                 <?php endif; ?>
-                <input type="file" name="image" class="form-control" accept="image/*">
+                <?php
+                    // If the current poster is an external URL, pre-fill the URL box.
+                    $currentIsUrl = preg_match('#^https?://#i', $currentImage);
+                ?>
+                <input type="url" name="image_url" class="form-control"
+                       value="<?= $currentIsUrl ? htmlspecialchars($currentImage) : '' ?>"
+                       placeholder="Paste an image URL, e.g. https://image.tmdb.org/.../poster.jpg">
                 <small class="text-secondary">Leave empty to keep the current image.</small>
             </div>
 

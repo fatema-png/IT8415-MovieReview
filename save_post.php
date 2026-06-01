@@ -49,23 +49,35 @@ $stmt->execute();
 $newMovieId = $conn->insert_id;
 $stmt->close();
 
-// ---- Handle the uploaded image (if any) ----
-if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-    // Make a unique file name so two uploads never clash
-    $fileName = time() . "_" . basename($_FILES['image']['name']);
-    $target   = "uploads/" . $fileName;
+// ---- Handle the poster image (URL only) ----
+// The poster is added by pasting an image URL; it is stored as-is and used
+// directly as the <img> source. The poster is optional.
+// $imgError stays null on success; otherwise it holds a message for the dashboard.
+$imgError  = null;
+$imageUrl  = trim($_POST['image_url'] ?? '');
 
-    if (move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
-        // Save the image path in the media table so the site can show it
+if ($imageUrl !== '') {
+    if (preg_match('#^https?://#i', $imageUrl)
+        && filter_var($imageUrl, FILTER_VALIDATE_URL)
+        && strlen($imageUrl) <= 255) {
         $mediaStmt = $conn->prepare("
             INSERT INTO dbproj_media (movie_id, file_path, file_type)
             VALUES (?, ?, 'image')
         ");
-        $mediaStmt->bind_param("is", $newMovieId, $target);
+        $mediaStmt->bind_param("is", $newMovieId, $imageUrl);
         $mediaStmt->execute();
         $mediaStmt->close();
+    } else {
+        $imgError = 'The image URL is not valid. Use a link starting with '
+                  . 'http:// or https:// (max 255 characters).';
     }
 }
 
-header("Location: creator_dashboard.php?msg=created");
+// The review was created either way; tell the dashboard, and pass on any
+// image problem so it can be shown as a warning.
+$redirect = "creator_dashboard.php?msg=created";
+if ($imgError !== null) {
+    $redirect .= "&imgerror=" . urlencode($imgError);
+}
+header("Location: " . $redirect);
 exit();

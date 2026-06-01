@@ -159,22 +159,23 @@ CREATE TABLE `dbproj_media` (
         REFERENCES `dbproj_movies` (`movie_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Posters are stored as external image URLs (no local uploads folder needed).
 INSERT INTO `dbproj_media` (`movie_id`, `file_path`, `file_type`) VALUES
-(1,  'uploads/inception.jpg',                              'image'),
-(2,  'uploads/godfather.jpg',                              'image'),
-(3,  'uploads/grandbudapest.jpg',                          'image'),
-(4,  'uploads/getout.jpg',                                 'image'),
-(5,  'uploads/interstellar.jpg',                           'image'),
-(6,  'uploads/GoneGirl.jpg',                               'image'),
-(7,  'uploads/SpiritedAway.jpg',                           'image'),
-(8,  'uploads/FuryRoad.jpg',                               'image'),
-(9,  'uploads/Parasite.jpg',                               'image'),
-(10, 'uploads/TheMatrix.jpg',                              'image'),
-(11, 'uploads/Everything Everywhere All at Once.jpg',      'image'),
-(12, 'uploads/Hereditary.jpg',                             'image'),
-(13, 'uploads/KnivesOut.jpg',                              'image'),
-(14, 'uploads/Maverick.jpg',                               'image'),
-(15, 'uploads/Oppenheimer.jpg',                            'image');
+(1,  'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg',                                            'image'),
+(2,  'https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_.jpg',                            'image'),
+(3,  'https://m.media-amazon.com/images/M/MV5BMzM5NjUxOTEyMl5BMl5BanBnXkFtZTgwNjEyMDM0MDE@._V1_FMjpg_UX1000_.jpg',                              'image'),
+(4,  'https://m.media-amazon.com/images/M/MV5BMjUxMDQwNjcyNl5BMl5BanBnXkFtZTgwNzcwMzc0MTI@._V1_.jpg',                                            'image'),
+(5,  'https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg',              'image'),
+(6,  'https://lumiere-a.akamaihd.net/v1/images/image_059c8da8.jpeg?region=0%2C0%2C800%2C1200',                                                  'image'),
+(7,  'https://upload.wikimedia.org/wikipedia/en/thumb/d/db/Spirited_Away_Japanese_poster.png/250px-Spirited_Away_Japanese_poster.png',          'image'),
+(8,  'https://m.media-amazon.com/images/M/MV5BZDRkODJhOTgtOTc1OC00NTgzLTk4NjItNDgxZDY4YjlmNDY2XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg',              'image'),
+(9,  'https://image.tmdb.org/t/p/original/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg',                                                                     'image'),
+(10, 'https://media.themoviedb.org/t/p/w220_and_h330_face/8bqQCNer6aNtO3sWcCZ6SV6E6fS.jpg',                                                     'image'),
+(11, 'https://m.media-amazon.com/images/M/MV5BOWNmMzAzZmQtNDQ1NC00Nzk5LTkyMmUtNGI2N2NkOWM4MzEyXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg',              'image'),
+(12, 'https://m.media-amazon.com/images/I/91U6sekg9yL.jpg',                                                                                     'image'),
+(13, 'https://m.media-amazon.com/images/M/MV5BZDU5ZTRkYmItZjg0Mi00ZTQwLThjMWItNWM3MTMxMzVjZmVjXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg',              'image'),
+(14, 'https://m.media-amazon.com/images/I/71BokibfVUL.jpg',                                                                                     'image'),
+(15, 'https://upload.wikimedia.org/wikipedia/en/4/4a/Oppenheimer_%28film%29.jpg',                                                               'image');
 
 
 -- ============================================================

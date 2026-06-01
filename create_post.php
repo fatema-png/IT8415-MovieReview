@@ -33,8 +33,7 @@ $error = $_GET['error'] ?? '';
             <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
-        <!-- enctype is needed because we upload an image file -->
-        <form action="save_post.php" method="POST" enctype="multipart/form-data" id="postForm">
+        <form action="save_post.php" method="POST" id="postForm">
 
             <div class="mb-3">
                 <label class="form-label">Title</label>
@@ -77,8 +76,10 @@ $error = $_GET['error'] ?? '';
             </div>
 
             <div class="mb-4">
-                <label class="form-label">Poster Image</label>
-                <input type="file" name="image" class="form-control" accept="image/*">
+                <label class="form-label">Poster Image URL</label>
+                <input type="url" name="image_url" class="form-control"
+                       placeholder="Paste an image URL, e.g. https://image.tmdb.org/.../poster.jpg">
+                <small class="text-secondary">Optional. Paste a direct link to an image (ending in .jpg, .png, etc.).</small>
             </div>
 
             <!-- Two buttons: save as a draft, or publish straight away.
