@@ -99,6 +99,9 @@ $avg_stmt->close();
             💬 Comments <span style="color:#888; font-weight:400; font-size:1rem;">(<?= count($comments) ?>)</span>
         </h3>
 
+        <!-- Confirmation message shown to admins after removing a comment -->
+        <p id="deleteMsg" style="margin-bottom:16px; font-size:0.9rem; display:none;"></p>
+
         <!-- Add Comment Form (logged-in only) -->
         <?php if (isLoggedIn()): ?>
             <div style="margin-bottom:28px; border-bottom:1px solid #333; padding-bottom:24px;">
@@ -316,6 +319,16 @@ $avg_stmt->close();
                 el.style.opacity = '0';
                 setTimeout(() => el.remove(), 300);
             }
+
+            // Update the comment count in the header
+            const h3span = document.querySelector('#commentsSection h3 span');
+            if (h3span) {
+                const current = parseInt(h3span.textContent.replace(/\D/g, '') || '0');
+                h3span.textContent = `(${Math.max(0, current - 1)})`;
+            }
+
+            // Confirm the deletion to the admin
+            showMsg(document.getElementById('deleteMsg'), '✓ Comment deleted.', '#4caf50');
         } else {
             alert(data.message);
         }
