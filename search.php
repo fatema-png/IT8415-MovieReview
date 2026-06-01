@@ -2,7 +2,9 @@
 require_once 'db.php';
 require_once 'auth.php';
 
-// ---------- Input sanitization ----------
+// Values used only to pre-fill the search form. The actual querying and the
+// rendering of the results live in search_results.php, which is included below
+// for the first page load and fetched via AJAX for live, type-as-you-go search.
 $search_title   = trim($_GET['title']   ?? '');
 $search_creator = trim($_GET['creator'] ?? '');
 $date_from      = $_GET['date_from']    ?? '';
@@ -11,118 +13,8 @@ $sort_by        = in_array($_GET['sort'] ?? '', ['newest', 'oldest', 'popular', 
                     ? $_GET['sort'] : 'newest';
 $genre_id       = intval($_GET['genre'] ?? 0);
 
-// ---------- Pagination ----------
-$per_page    = 10;
-$page        = max(1, intval($_GET['page'] ?? 1));
-$offset      = ($page - 1) * $per_page;
-
-// ---------- Build query ----------
-$conditions = ["m.status = 'published'"];
-$params     = [];
-$types      = '';
-
-if ($search_title !== '') {
-    // Full-text search using the ft_movie_search FULLTEXT index
-    $conditions[] = "MATCH(m.title, m.description) AGAINST(? IN BOOLEAN MODE)";
-    $params[]     = $search_title . '*';
-    $types       .= 's';
-}
-
-if ($search_creator !== '') {
-    $conditions[] = "u.username LIKE ?";
-    $params[]     = '%' . $search_creator . '%';
-    $types       .= 's';
-}
-
-if ($date_from !== '') {
-    $conditions[] = "DATE(m.created_at) >= ?";
-    $params[]     = $date_from;
-    $types       .= 's';
-}
-
-if ($date_to !== '') {
-    $conditions[] = "DATE(m.created_at) <= ?";
-    $params[]     = $date_to;
-    $types       .= 's';
-}
-
-if ($genre_id > 0) {
-    $conditions[] = "m.genre_id = ?";
-    $params[]     = $genre_id;
-    $types       .= 'i';
-}
-
-$where = 'WHERE ' . implode(' AND ', $conditions);
-
-$order = match ($sort_by) {
-    'oldest'  => 'ORDER BY m.created_at ASC',
-    'popular' => 'ORDER BY m.view_count DESC',
-    'rating'  => 'ORDER BY avg_rating DESC',
-    default   => 'ORDER BY m.created_at DESC',
-};
-
-// Count total results for pagination
-$count_sql = "
-    SELECT COUNT(DISTINCT m.movie_id) AS total
-    FROM dbproj_movies m
-    JOIN dbproj_users u ON m.user_id = u.user_id
-    LEFT JOIN dbproj_genres g ON m.genre_id = g.genre_id
-    $where
-";
-
-$count_stmt = $conn->prepare($count_sql);
-if (!empty($params)) {
-    $count_stmt->bind_param($types, ...$params);
-}
-$count_stmt->execute();
-$total_results = $count_stmt->get_result()->fetch_assoc()['total'];
-$total_pages   = ceil($total_results / $per_page);
-$count_stmt->close();
-
-// Main search query
-$sql = "
-    SELECT
-        m.movie_id,
-        m.title,
-        m.description,
-        m.release_year,
-        m.view_count,
-        m.created_at,
-        u.username AS creator,
-        g.genre_name,
-        ROUND(AVG(r.rating_value), 1) AS avg_rating,
-        COUNT(DISTINCT r.rating_id) AS total_ratings,
-        COUNT(DISTINCT c.comment_id) AS total_comments,
-        (SELECT med.file_path FROM dbproj_media med
-         WHERE med.movie_id = m.movie_id AND med.file_type = 'image'
-         LIMIT 1) AS thumbnail
-    FROM dbproj_movies m
-    JOIN dbproj_users u ON m.user_id = u.user_id
-    LEFT JOIN dbproj_genres g ON m.genre_id = g.genre_id
-    LEFT JOIN dbproj_ratings r ON m.movie_id = r.movie_id
-    LEFT JOIN dbproj_comments c ON m.movie_id = c.movie_id
-    $where
-    GROUP BY m.movie_id
-    $order
-    LIMIT ? OFFSET ?
-";
-
-$params[]  = $per_page;
-$params[]  = $offset;
-$types    .= 'ii';
-
-$stmt = $conn->prepare($sql);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
-$stmt->execute();
-$results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-
-// Fetch genres for filter dropdown
+// Genres for the filter dropdown
 $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY genre_name")->fetch_all(MYSQLI_ASSOC);
-
-$any_search = $search_title || $search_creator || $date_from || $date_to || $genre_id;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -448,114 +340,76 @@ $any_search = $search_title || $search_creator || $date_from || $date_to || $gen
             </div>
         </form>
 
-        <!-- Results -->
-        <?php if ($any_search): ?>
-            <div class="results-header">
-                <span><?= $total_results ?> result<?= $total_results != 1 ? 's' : '' ?> found</span>
-                <?php if ($total_results > 0): ?>
-                    <span>Page <?= $page ?> of <?= $total_pages ?></span>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($any_search && empty($results)): ?>
-            <div class="no-results">
-                <div class="icon">🎬</div>
-                <p>No reviews found matching your search.</p>
-                <a href="search.php" style="color:#e50914;">Clear Search</a>
-            </div>
-        <?php endif; ?>
-
-        <?php foreach ($results as $movie): ?>
-            <div class="movie-card">
-                <?php if ($movie['thumbnail']): ?>
-                    <img src="<?= htmlspecialchars($movie['thumbnail']) ?>"
-                         alt="<?= htmlspecialchars($movie['title']) ?>"
-                         class="movie-thumb">
-                <?php else: ?>
-                    <div class="movie-thumb-placeholder">🎬</div>
-                <?php endif; ?>
-
-                <div class="movie-info">
-                    <a href="movie.php?id=<?= $movie['movie_id'] ?>" class="movie-title">
-                        <?= htmlspecialchars($movie['title']) ?>
-                        <span style="color:#888; font-weight:400; font-size:0.9rem;">
-                            (<?= $movie['release_year'] ?>)
-                        </span>
-                    </a>
-
-                    <div class="movie-meta">
-                        <?php if ($movie['genre_name']): ?>
-                            <span class="badge"><?= htmlspecialchars($movie['genre_name']) ?></span>
-                        <?php endif; ?>
-                        <span>👤 <?= htmlspecialchars($movie['creator']) ?></span>
-                        <span>👁 <?= number_format($movie['view_count']) ?> views</span>
-                        <span>💬 <?= $movie['total_comments'] ?> comments</span>
-                        <?php if ($movie['avg_rating']): ?>
-                            <span class="stars">
-                                <?= str_repeat('★', round($movie['avg_rating'])) ?><?= str_repeat('☆', 5 - round($movie['avg_rating'])) ?>
-                            </span>
-                            <span style="color:#f5c518;"><?= $movie['avg_rating'] ?>/5</span>
-                        <?php else: ?>
-                            <span style="color:#666;">Not yet rated</span>
-                        <?php endif; ?>
-                        <span style="margin-left:8px; color:#666; font-size:0.8rem;">
-                            <?= date('M d, Y', strtotime($movie['created_at'])) ?>
-                        </span>
-                    </div>
-
-                    <p class="movie-desc">
-                        <?= htmlspecialchars(mb_strimwidth($movie['description'], 0, 180, '...')) ?>
-                    </p>
-
-                    <a href="movie.php?id=<?= $movie['movie_id'] ?>" class="btn-view">View Review →</a>
-                </div>
-            </div>
-        <?php endforeach; ?>
-
-        <!-- Pagination -->
-        <?php if ($total_pages > 1): ?>
-            <?php
-            // Build pagination URL preserving all search params
-            $base_params = array_filter([
-                'title'     => $search_title,
-                'creator'   => $search_creator,
-                'date_from' => $date_from,
-                'date_to'   => $date_to,
-                'sort'      => $sort_by,
-                'genre'     => $genre_id ?: null,
-            ]);
-            ?>
-            <div class="pagination">
-                <?php if ($page > 1): ?>
-                    <a href="?<?= http_build_query(array_merge($base_params, ['page' => $page - 1])) ?>">← Prev</a>
-                <?php endif; ?>
-
-                <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                    <?php if ($i == $page): ?>
-                        <span class="active"><?= $i ?></span>
-                    <?php else: ?>
-                        <a href="?<?= http_build_query(array_merge($base_params, ['page' => $i])) ?>"><?= $i ?></a>
-                    <?php endif; ?>
-                <?php endfor; ?>
-
-                <?php if ($page < $total_pages): ?>
-                    <a href="?<?= http_build_query(array_merge($base_params, ['page' => $page + 1])) ?>">Next →</a>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+        <!-- Results (server-rendered first, then refreshed live via AJAX) -->
+        <div id="resultsContainer">
+            <?php include __DIR__ . '/search_results.php'; ?>
+        </div>
     </div>
 
     <script>
-        // JavaScript validation for date range
-        document.getElementById('searchForm').addEventListener('submit', function(e) {
-            const from = document.getElementById('date_from').value;
-            const to   = document.getElementById('date_to').value;
-            if (from && to && from > to) {
-                e.preventDefault();
-                alert('Error: "From Date" cannot be after "To Date".');
-            }
-        });
+    // ---- Live search: refresh results as the user types/changes filters ----
+    const searchForm       = document.getElementById('searchForm');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const fromInput        = document.getElementById('date_from');
+    const toInput          = document.getElementById('date_to');
+
+    // Build the query string from the current form values (drops empty fields).
+    function buildSearchQuery() {
+        const params = new URLSearchParams(new FormData(searchForm));
+        for (const [key, value] of [...params]) {
+            if (value === '') params.delete(key);
+        }
+        return params.toString();
+    }
+
+    // Fetch the results fragment and swap it in. Keeps the address bar in sync
+    // so the search stays shareable/bookmarkable and survives a refresh.
+    async function loadResults(query, updateUrl = true) {
+        try {
+            const res  = await fetch('search_results.php' + (query ? '?' + query : ''));
+            resultsContainer.innerHTML = await res.text();
+        } catch (err) {
+            // Network hiccup: leave the current results in place.
+            return;
+        }
+        if (updateUrl) {
+            history.replaceState(null, '', 'search.php' + (query ? '?' + query : ''));
+        }
+    }
+
+    // A new search always starts from page 1 (buildSearchQuery omits "page").
+    function runSearch() {
+        // Don't search on an invalid date range; wait until it's fixed.
+        if (fromInput.value && toInput.value && fromInput.value > toInput.value) return;
+        loadResults(buildSearchQuery());
+    }
+
+    // Debounce typing so we don't fire a request on every keystroke.
+    let searchTimer = null;
+    searchForm.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(runSearch, 300);
+    });
+
+    // Clicking "Search" (or pressing Enter) searches immediately, no reload.
+    searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (fromInput.value && toInput.value && fromInput.value > toInput.value) {
+            alert('Error: "From Date" cannot be after "To Date".');
+            return;
+        }
+        clearTimeout(searchTimer);
+        runSearch();
+    });
+
+    // Pagination links inside the (replaced) results also load via AJAX.
+    resultsContainer.addEventListener('click', (e) => {
+        const link = e.target.closest('.pagination a');
+        if (!link) return;
+        e.preventDefault();
+        loadResults(link.getAttribute('href').replace(/^\?/, ''));
+        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
     </script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	
@@ -604,6 +458,8 @@ titleInput.addEventListener('input', async function () {
             item.addEventListener('click', function () {
                 titleInput.value = this.dataset.title;
                 suggestionsBox.innerHTML = '';
+                // Refresh the results for the chosen title (fires live search).
+                titleInput.dispatchEvent(new Event('input', { bubbles: true }));
             });
         });
     } catch (error) {
