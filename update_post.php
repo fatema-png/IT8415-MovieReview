@@ -1,5 +1,5 @@
 <?php
-// Handles the "Edit Review" form (from edit_post.php).
+
 require_once 'db.php';
 require_once 'auth.php';
 
@@ -24,7 +24,7 @@ if ($movieId <= 0 || $title === '' || $description === '' || $genreId <= 0) {
     exit();
 }
 
-// Ownership check: make sure this movie belongs to the current user (or admin)
+// ownership check: make sure this movie belongs to the current user (or admin)
 $check = $conn->prepare("SELECT user_id FROM dbproj_movies WHERE movie_id = ?");
 $check->bind_param("i", $movieId);
 $check->execute();
@@ -38,7 +38,7 @@ if ($owner['user_id'] != getCurrentUserId() && !isAdmin()) {
     die("You are not allowed to edit this review.");
 }
 
-// Work out the new status based on which button was clicked
+// work out the new status based on which button was clicked
 $statusSql = "";
 if ($action === 'publish') {
     $statusSql = ", status = 'published'";
@@ -50,7 +50,7 @@ $genreIdParam     = $genreId > 0 ? $genreId : null;
 $releaseYearParam = $releaseYear > 0 ? $releaseYear : null;
 $trailerUrlParam  = $trailerUrl !== '' ? $trailerUrl : null;
 
-// Update the movie
+// update the movie
 $stmt = $conn->prepare("
     UPDATE dbproj_movies
     SET title = ?, genre_id = ?, description = ?, full_review = ?,
@@ -65,9 +65,7 @@ $stmt->bind_param(
 $stmt->execute();
 $stmt->close();
 
-// Replace the poster if a new image URL was given. If the URL box is left
-// empty, the current poster is kept. The poster is added by URL only.
-// $imgError stays null on success; otherwise it carries a message for the dashboard.
+//1hour of my life wasted here i love php 
 $imgError = null;
 $imageUrl = trim($_POST['image_url'] ?? '');
 
@@ -75,7 +73,7 @@ if ($imageUrl !== '') {
     if (preg_match('#^https?://#i', $imageUrl)
         && filter_var($imageUrl, FILTER_VALIDATE_URL)
         && strlen($imageUrl) <= 255) {
-        // Remove the old image row for this movie, then store the new URL
+        // remove old image row for this movie then store the new url
         $del = $conn->prepare("DELETE FROM dbproj_media WHERE movie_id = ? AND file_type = 'image'");
         $del->bind_param("i", $movieId);
         $del->execute();

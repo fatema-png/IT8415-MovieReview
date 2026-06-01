@@ -1,10 +1,7 @@
 <?php
-/**
- * ajax/submit_rating.php
- * AJAX endpoint: POST only. Returns JSON.
- * Inserts or updates a rating (1–5 stars).
- * Uses UNIQUE KEY (movie_id, user_id) to prevent duplicate ratings.
- */
+
+// post only. returns json
+
 require_once '../db.php';
 require_once '../auth.php';
 
@@ -29,7 +26,7 @@ if ($movie_id <= 0 || $rating_value < 1 || $rating_value > 5) {
     exit();
 }
 
-// INSERT or UPDATE (user can change their rating)
+// insert or update (user can change their rating)
 $stmt = $conn->prepare("
     INSERT INTO dbproj_ratings (movie_id, user_id, rating_value)
     VALUES (?, ?, ?)
@@ -38,7 +35,7 @@ $stmt = $conn->prepare("
 $stmt->bind_param('iii', $movie_id, $user_id, $rating_value);
 
 if ($stmt->execute()) {
-    // Fetch updated average and count
+    // fetch updated average and count
     $avg_stmt = $conn->prepare("
         SELECT ROUND(AVG(rating_value), 1) AS avg_rating,
                COUNT(*) AS total_ratings

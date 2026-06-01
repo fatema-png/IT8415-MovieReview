@@ -50,7 +50,7 @@ if (!$movie) {
     die("Movie not found.");
 }
 
-// optional: increase view count
+// optional
 $update_views = $conn->prepare("UPDATE dbproj_movies SET view_count = view_count + 1 WHERE movie_id = ?");
 $update_views->bind_param("i", $movie_id);
 $update_views->execute();
@@ -239,7 +239,7 @@ $movie['view_count']++;
             </div>
         <?php endif; ?>
 
-        <!-- Trailer (a video media file for this movie) -->
+        <!-- trailer (a video media file for this movie) -->
         <?php if (!empty($movie['trailer_url'])): ?>
             <div style="margin-top:28px;">
                 <h3 style="color:#fff; font-size:1.2rem; margin-bottom:12px;">🎬 Trailer</h3>

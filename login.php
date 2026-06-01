@@ -2,13 +2,13 @@
 require_once 'db.php';
 require_once 'auth.php';
 
-// Already logged in → go home
+// already logged in then go home
 if (isLoggedIn()) {
     header("Location: index.php");
     exit();
 }
 
-// Show any message set before we were redirected here (e.g. access denied)
+// show any message set before we were redirected here (like ccess denied)
 $error = getFlash() ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -114,11 +114,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script>
-    // JavaScript validation before sending the login form
+    // javascript validation before sending the login form
     document.getElementById('loginForm').addEventListener('submit', function (e) {
         const email = this.email.value.trim();
         const pass  = this.password.value;
-        // A very simple email pattern check
+        // simple email pattern check
         const emailOk = /^\S+@\S+\.\S+$/.test(email);
         if (!emailOk) {
             e.preventDefault();

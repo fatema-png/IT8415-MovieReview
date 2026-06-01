@@ -1,18 +1,15 @@
 <?php
-/**
- * admin_reports.php
- * Admin-only. Generates:
- *   Report 1: Most popular movies in a date range (uses stored procedure)
- *   Report 2: Content created by a specific user
- */
+// admin only. 
+// report 1: most popular movies in a date range (uses stored procedure)
+// report 2: content created by a specific creator
 require_once 'db.php';
 require_once 'auth.php';
 
 requireAdmin(); // Redirect non-admins
 
-// ---- Report 1: Popular movies by date range ----
-$r1_from    = $_GET['r1_from']    ?? date('Y-01-01'); // Default: Jan 1 current year
-$r1_to      = $_GET['r1_to']      ?? date('Y-m-d');   // Default: today
+// report 1: popular movies by date range
+$r1_from    = $_GET['r1_from']    ?? date('Y-01-01'); // default Jan 1 current year
+$r1_to      = $_GET['r1_to']      ?? date('Y-m-d');   // default today
 $r1_results = [];
 $r1_error   = '';
 
@@ -20,27 +17,26 @@ if (!empty($r1_from) && !empty($r1_to)) {
     if ($r1_from > $r1_to) {
         $r1_error = 'Start date cannot be after end date.';
     } else {
-        // Call the stored procedure created by Member 1
+        // call procedure 
         $stmt = $conn->prepare("CALL GetPopularMoviesByDateRange(?, ?)");
         $stmt->bind_param('ss', $r1_from, $r1_to);
         $stmt->execute();
         $r1_results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
 
-        // A stored procedure (CALL) leaves an extra empty result set behind.
-        // We clear it so the next query on this connection still works.
+        // we clear it so the next query on this connection still work
         while ($conn->more_results()) {
             $conn->next_result();
         }
     }
 }
 
-// ---- Report 2: Content by a specific user ----
+// report 2: content by a specific creator
 $r2_user_id  = intval($_GET['r2_user'] ?? 0);
 $r2_results  = [];
 $r2_user_info = null;
 
-// Fetch all creators for the dropdown
+// get all creators for the dropdown
 $creators = $conn->query("
     SELECT u.user_id, u.username, u.email
     FROM dbproj_users u
@@ -49,14 +45,14 @@ $creators = $conn->query("
 ")->fetch_all(MYSQLI_ASSOC);
 
 if ($r2_user_id > 0) {
-    // Get user info
+    // get user info
     $us = $conn->prepare("SELECT username, email FROM dbproj_users WHERE user_id = ?");
     $us->bind_param('i', $r2_user_id);
     $us->execute();
     $r2_user_info = $us->get_result()->fetch_assoc();
     $us->close();
 
-    // Get all their movies
+    // get all their movies
     $stmt2 = $conn->prepare("
         SELECT
             m.movie_id, m.title, m.description, m.release_year,
@@ -93,11 +89,11 @@ if ($r2_user_id > 0) {
         h1 { color: #fff; margin-bottom: 6px; }
         .subtitle { color: #888; margin-bottom: 36px; }
 
-        /* Report cards */
+        /* report cards */
         .report-card { background: #1e1e2e; border-radius: 12px; padding: 28px; margin-bottom: 36px; }
         .report-card h2 { color: #e50914; font-size: 1.15rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 18px; }
 
-        /* Filter rows */
+        /* filter rows */
         .filter-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin-bottom: 22px; }
         .filter-row label { color: #aaa; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .filter-row input, .filter-row select {
@@ -107,7 +103,7 @@ if ($r2_user_id > 0) {
         .btn-run { background: #e50914; color: #fff; border: none; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-weight: 600; }
         .btn-run:hover { background: #b0060f; }
 
-        /* Tables */
+        /* tables */
         .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .report-table th { background: #2a2a3e; color: #ccc; text-align: left; padding: 10px 14px; font-size: 0.83rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .report-table td { padding: 11px 14px; border-bottom: 1px solid #2a2a3e; color: #ddd; font-size: 0.92rem; }
@@ -119,7 +115,7 @@ if ($r2_user_id > 0) {
         .status-draft     { background: #4a3a1a; color: #ff9800; }
         .empty-msg { color: #666; text-align: center; padding: 30px 0; }
 
-        /* Summary bar */
+        /* summary bar */
         .summary-bar { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
         .summary-stat { background: #2a2a3e; border-radius: 8px; padding: 14px 20px; }
         .summary-stat .val { font-size: 1.6rem; font-weight: 700; color: #e50914; }
@@ -135,7 +131,7 @@ if ($r2_user_id > 0) {
         <h1>📊 Admin Reports</h1>
         <p class="subtitle">Generate reports for content analysis and moderation.</p>
 
-        <!-- ========== REPORT 1: Popular Movies by Date Range ========== -->
+        <!--report 1: popular movies by date range -->
         <div class="report-card">
             <h2>Report 1 — Most Popular Movies in Date Range</h2>
             <form method="GET" action="admin_reports.php">
@@ -227,7 +223,7 @@ if ($r2_user_id > 0) {
             <?php endif; ?>
         </div>
 
-        <!-- ========== REPORT 2: Content by User ========== -->
+        <!-- report 2: content by creator -->
         <div class="report-card">
             <h2>Report 2 — Content by Creator</h2>
             <form method="GET" action="admin_reports.php">

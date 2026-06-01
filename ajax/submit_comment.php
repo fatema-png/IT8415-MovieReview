@@ -1,21 +1,19 @@
 <?php
-/**
- * ajax/submit_comment.php
- * AJAX endpoint: POST only. Returns JSON.
- * Called by movie.php via fetch()
- */
+
+ // post only. returns json
+
 require_once '../db.php';
 require_once '../auth.php';
 
 header('Content-Type: application/json');
 
-// Only accept POST
+// only accept post
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
     exit();
 }
 
-// Must be logged in
+// must be logged in
 if (!isLoggedIn()) {
     echo json_encode(['success' => false, 'message' => 'You must be logged in to comment.']);
     exit();
@@ -25,7 +23,7 @@ $movie_id     = intval($_POST['movie_id'] ?? 0);
 $comment_text = trim($_POST['comment_text'] ?? '');
 $user_id      = getCurrentUserId();
 
-// Server-side validation
+// server side validation
 if ($movie_id <= 0) {
     echo json_encode(['success' => false, 'message' => 'Invalid movie.']);
     exit();
@@ -41,7 +39,7 @@ if (strlen($comment_text) > 1000) {
     exit();
 }
 
-// Verify movie exists and is published
+// verify movie exists and is published
 $check = $conn->prepare("SELECT movie_id FROM dbproj_movies WHERE movie_id = ? AND status = 'published'");
 $check->bind_param('i', $movie_id);
 $check->execute();
@@ -51,7 +49,7 @@ if ($check->get_result()->num_rows === 0) {
 }
 $check->close();
 
-// Insert comment using prepared statement
+// insert comment using prepared statement
 $stmt = $conn->prepare("INSERT INTO dbproj_comments (movie_id, user_id, comment_text) VALUES (?, ?, ?)");
 $stmt->bind_param('iis', $movie_id, $user_id, $comment_text);
 

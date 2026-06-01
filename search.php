@@ -2,9 +2,9 @@
 require_once 'db.php';
 require_once 'auth.php';
 
-// Values used only to pre-fill the search form. The actual querying and the
-// rendering of the results live in search_results.php, which is included below
-// for the first page load and fetched via AJAX for live, type-as-you-go search.
+// values used only to pre fill the search form. The actual querying and the
+// rendering of the results live in search results php, which is included below
+// for the first page load and got by ajax for live type as you go search
 $search_title   = trim($_GET['title']   ?? '');
 $search_creator = trim($_GET['creator'] ?? '');
 $date_from      = $_GET['date_from']    ?? '';
@@ -13,7 +13,7 @@ $sort_by        = in_array($_GET['sort'] ?? '', ['newest', 'oldest', 'popular', 
                     ? $_GET['sort'] : 'newest';
 $genre_id       = intval($_GET['genre'] ?? 0);
 
-// Genres for the filter dropdown
+// genres for the filter dropdown
 $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY genre_name")->fetch_all(MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -22,7 +22,6 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Movie Reviews</title>
-    <!-- Link to Member 4's stylesheet -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
@@ -281,12 +280,12 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
 </style>
 </head>
 <body>
-    <?php include 'includes/navbar.php'; // Member 4's nav ?>
+    <?php include 'includes/navbar.php';?>
 
     <div class="search-container">
         <h1 style="color:#fff; margin-bottom:24px;">🔍 Search Movie Reviews</h1>
 
-        <!-- Search Form -->
+        <!-- search form -->
         <form class="search-form" method="GET" action="search.php" id="searchForm">
             <div class="form-row">
                 <div class="form-group suggestion-wrapper" style="flex:2; min-width:240px;">
@@ -340,20 +339,20 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
             </div>
         </form>
 
-        <!-- Results (server-rendered first, then refreshed live via AJAX) -->
+        <!-- server rendered first then refreshed live by ajax -->
         <div id="resultsContainer">
             <?php include __DIR__ . '/search_results.php'; ?>
         </div>
     </div>
 
     <script>
-    // ---- Live search: refresh results as the user types/changes filters ----
+    // live search: refresh results as the user types/changes filters
     const searchForm       = document.getElementById('searchForm');
     const resultsContainer = document.getElementById('resultsContainer');
     const fromInput        = document.getElementById('date_from');
     const toInput          = document.getElementById('date_to');
 
-    // Build the query string from the current form values (drops empty fields).
+    // build the query string from the current form values (drops empty fields)
     function buildSearchQuery() {
         const params = new URLSearchParams(new FormData(searchForm));
         for (const [key, value] of [...params]) {
@@ -362,14 +361,14 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
         return params.toString();
     }
 
-    // Fetch the results fragment and swap it in. Keeps the address bar in sync
-    // so the search stays shareable/bookmarkable and survives a refresh.
+    // get the results and swap it in. keeps the address bar in sync
+    // so the search stays shareable/bookmarkable and survives a refresh
     async function loadResults(query, updateUrl = true) {
         try {
             const res  = await fetch('search_results.php' + (query ? '?' + query : ''));
             resultsContainer.innerHTML = await res.text();
         } catch (err) {
-            // Network hiccup: leave the current results in place.
+            // leave the current results in place
             return;
         }
         if (updateUrl) {
@@ -377,21 +376,20 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
         }
     }
 
-    // A new search always starts from page 1 (buildSearchQuery omits "page").
+    // a new search always starts from page 1
     function runSearch() {
-        // Don't search on an invalid date range; wait until it's fixed.
+        // dont search on an invalid date range, wait
         if (fromInput.value && toInput.value && fromInput.value > toInput.value) return;
         loadResults(buildSearchQuery());
     }
 
-    // Debounce typing so we don't fire a request on every keystroke.
+    // make sure we dont fire a request on every keystroke.
     let searchTimer = null;
     searchForm.addEventListener('input', () => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(runSearch, 300);
     });
 
-    // Pressing Enter searches immediately (no reload); results otherwise update live.
     searchForm.addEventListener('submit', (e) => {
         e.preventDefault();
         if (fromInput.value && toInput.value && fromInput.value > toInput.value) {
@@ -402,7 +400,6 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
         runSearch();
     });
 
-    // "Clear" empties all filters and shows the full list again.
     document.getElementById('clearBtn').addEventListener('click', () => {
         searchForm.reset();
         document.getElementById('suggestions').innerHTML = '';
@@ -410,7 +407,7 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
         runSearch();
     });
 
-    // Pagination links inside the (replaced) results also load via AJAX.
+    // pagination links also load
     resultsContainer.addEventListener('click', (e) => {
         const link = e.target.closest('.pagination a');
         if (!link) return;
@@ -425,7 +422,7 @@ $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY 
 const titleInput = document.getElementById('title');
 const suggestionsBox = document.getElementById('suggestions');
 
-// Escape user/creator-controlled text before putting it in the DOM (prevents XSS).
+// escape user/creator controlled text before putting it in the dom = prevent xss
 function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, ch => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -466,7 +463,7 @@ titleInput.addEventListener('input', async function () {
             item.addEventListener('click', function () {
                 titleInput.value = this.dataset.title;
                 suggestionsBox.innerHTML = '';
-                // Refresh the results for the chosen title (fires live search).
+                // refresh the results for the chosen title (fires live search).
                 titleInput.dispatchEvent(new Event('input', { bubbles: true }));
             });
         });

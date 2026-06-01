@@ -131,7 +131,7 @@ require_once __DIR__ . '/auth.php';
                             View Review
                         </a>
                     </div>
-                    </div><!-- /flex-grow-1 -->
+                    </div>
                 </div>
             </div>
         <?php } ?>

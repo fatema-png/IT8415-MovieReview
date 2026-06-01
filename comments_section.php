@@ -1,22 +1,10 @@
 <?php
-/**
- * comments_section.php
- * Include this file inside movie.php (Member 3's page).
- *
- * Usage:
- *   $movie_id = <the movie's ID>;
- *   include 'comments_section.php';
- *
- * Requires:
- *   - db.php already included (gives us $conn)
- *   - auth.php already included (gives us the login helper functions)
- */
 
 if (!isset($movie_id) || !isset($conn)) {
     die('comments_section.php requires $movie_id and $conn to be set.');
 }
 
-// Fetch all comments for this movie
+// get all comments for this movie
 $comments_stmt = $conn->prepare("
     SELECT c.comment_id, c.comment_text, c.created_at,
            u.username, u.user_id
@@ -30,7 +18,7 @@ $comments_stmt->execute();
 $comments = $comments_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $comments_stmt->close();
 
-// Fetch current user's existing rating (if logged in)
+// get current user existing rating (if logged in)
 $user_rating = 0;
 if (isLoggedIn()) {
     $ur_stmt = $conn->prepare("SELECT rating_value FROM dbproj_ratings WHERE movie_id = ? AND user_id = ?");
@@ -41,7 +29,7 @@ if (isLoggedIn()) {
     $ur_stmt->close();
 }
 
-// Fetch current average rating
+// get current average rating
 $avg_stmt = $conn->prepare("
     SELECT ROUND(AVG(rating_value), 1) AS avg_rating, COUNT(*) AS total_ratings
     FROM dbproj_ratings WHERE movie_id = ?
@@ -54,7 +42,7 @@ $avg_stmt->close();
 
 <div class="comments-ratings-section" id="commentsSection" style="margin-top: 40px;">
 
-    <!-- ========== STAR RATING ========== -->
+    <!-- star rating -->
     <div class="rating-box" style="background:#1e1e2e; border-radius:10px; padding:24px; margin-bottom:28px;">
         <h3 style="color:#fff; margin-bottom:12px;">⭐ Rating</h3>
         <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
@@ -93,16 +81,16 @@ $avg_stmt->close();
         </div>
     </div>
 
-    <!-- ========== COMMENTS ========== -->
+    <!-- comments -->
     <div class="comments-box" style="background:#1e1e2e; border-radius:10px; padding:24px;">
         <h3 style="color:#fff; margin-bottom:20px;">
             💬 Comments <span style="color:#888; font-weight:400; font-size:1rem;">(<?= count($comments) ?>)</span>
         </h3>
 
-        <!-- Confirmation message shown to admins after removing a comment -->
+        <!-- confirmation message shown to admins after removing a comment -->
         <p id="deleteMsg" style="margin-bottom:16px; font-size:0.9rem; display:none;"></p>
 
-        <!-- Add Comment Form (logged-in only) -->
+        <!-- add comment form (logged in only) -->
         <?php if (isLoggedIn()): ?>
             <div style="margin-bottom:28px; border-bottom:1px solid #333; padding-bottom:24px;">
                 <textarea id="commentInput" rows="3" maxlength="1000"
@@ -124,7 +112,7 @@ $avg_stmt->close();
             </p>
         <?php endif; ?>
 
-        <!-- Comments List -->
+        <!-- comments list -->
         <div id="commentsList">
             <?php if (empty($comments)): ?>
                 <p id="noComments" style="color:#666; text-align:center; padding:30px 0;">
@@ -167,16 +155,16 @@ $avg_stmt->close();
     </div>
 </div>
 
-<!-- ========== JAVASCRIPT (AJAX) ========== -->
+<!-- javascript (ajax) -->
 <script>
 (function () {
-    // ---- Star Rating ----
+    // ---- star rating ----
     const starContainer = document.getElementById('starInput');
     if (starContainer) {
         const stars = starContainer.querySelectorAll('.star');
         const movieId = starContainer.dataset.movie;
 
-        // Hover effects
+        // hover effects
         stars.forEach(star => {
             star.addEventListener('mouseenter', () => {
                 const val = parseInt(star.dataset.value);
@@ -187,7 +175,7 @@ $avg_stmt->close();
             stars.forEach(s => s.style.color = s.classList.contains('filled') ? '#f5c518' : '#555');
         });
 
-        // Click to rate
+        // click to rate
         stars.forEach(star => {
             star.addEventListener('click', async () => {
                 const rating = parseInt(star.dataset.value);
@@ -199,13 +187,13 @@ $avg_stmt->close();
                 const data = await res.json();
                 const msg = document.getElementById('ratingMsg');
                 if (data.success) {
-                    // Update star highlights
+                    // update star highlights
                     stars.forEach(s => {
                         const filled = parseInt(s.dataset.value) <= data.your_rating;
                         s.classList.toggle('filled', filled);
                         s.style.color = filled ? '#f5c518' : '#555';
                     });
-                    // Update average display
+                    // update average display
                     document.getElementById('avgRatingDisplay').innerHTML =
                         `<span style="font-size:2rem; color:#f5c518; font-weight:700;">${data.avg_rating}</span>
                          <span style="color:#999;"> / 5 &nbsp;(${data.total_ratings} ratings)</span>
@@ -221,7 +209,7 @@ $avg_stmt->close();
         });
     }
 
-    // ---- Comment Character Counter ----
+    // ---- comment character counter ----
     const commentInput = document.getElementById('commentInput');
     const charCount    = document.getElementById('charCount');
     if (commentInput) {
@@ -232,7 +220,7 @@ $avg_stmt->close();
         });
     }
 
-    // ---- Submit Comment (AJAX) ----
+    // ---- submit comment (ajax) ----
     const submitBtn = document.getElementById('submitCommentBtn');
     if (submitBtn) {
         submitBtn.addEventListener('click', async () => {
@@ -240,7 +228,7 @@ $avg_stmt->close();
             const movieId = submitBtn.dataset.movie;
             const msgEl   = document.getElementById('commentMsg');
 
-            // Client-side validation
+            // client side validation
             if (text.length < 3) {
                 showMsg(msgEl, 'Comment must be at least 3 characters.', '#e50914');
                 return;
@@ -261,7 +249,7 @@ $avg_stmt->close();
                 charCount.textContent = '0 / 1000 characters';
                 showMsg(msgEl, '✓ Comment posted!', '#4caf50');
 
-                // Prepend new comment to list (no page reload)
+                // prepend new comment to list (no page reload)
                 const noComments = document.getElementById('noComments');
                 if (noComments) noComments.remove();
 
@@ -282,7 +270,7 @@ $avg_stmt->close();
                     </div>`;
                 document.getElementById('commentsList').prepend(newComment);
 
-                // Update count in header
+                // update count in header
                 const h3 = document.querySelector('#commentsSection h3');
                 if (h3) {
                     const current = parseInt(h3.querySelector('span')?.textContent || '0');
@@ -297,7 +285,7 @@ $avg_stmt->close();
         });
     }
 
-    // ---- Delete Comment (Admin, AJAX) ----
+    // delete comment (admin, ajax)
     document.addEventListener('click', async (e) => {
         if (!e.target.classList.contains('delete-comment-btn')) return;
         if (!confirm('Remove this comment? This cannot be undone.')) return;
@@ -320,14 +308,14 @@ $avg_stmt->close();
                 setTimeout(() => el.remove(), 300);
             }
 
-            // Update the comment count in the header
+            // update the comment count in the header
             const h3span = document.querySelector('#commentsSection h3 span');
             if (h3span) {
                 const current = parseInt(h3span.textContent.replace(/\D/g, '') || '0');
                 h3span.textContent = `(${Math.max(0, current - 1)})`;
             }
 
-            // Confirm the deletion to the admin
+            // confirm the deletion to the admin
             showMsg(document.getElementById('deleteMsg'), '✓ Comment deleted.', '#4caf50');
         } else {
             alert(data.message);

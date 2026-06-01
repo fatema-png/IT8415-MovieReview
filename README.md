@@ -1,87 +1,46 @@
-# Movie Review System
+## How to run (local)
 
-A data-driven web application built with **Apache, PHP and MySQL**, where users can
-browse, search, rate and review movies. Built for the IT8415 group project.
+1. Install **XAMPP** and copy this folder into `htdocs`.
+2. In **phpMyAdmin**, import `database.sql` (creates the database, tables and demo data).
+3. Open `http://localhost/IT8415-MovieReview/`.
 
-## How to run it
-
-1. Install **XAMPP** (or any Apache + PHP + MySQL/MariaDB stack).
-2. Copy this `IT8415-MovieReview` folder into `htdocs`.
-3. Open **phpMyAdmin** (`http://localhost/phpmyadmin`) and **import `database.sql`**.
-   This creates the `dbproj_movies` database, all tables, the stored procedure,
-   the trigger, and the demo data.
-4. Visit `http://localhost/IT8415-MovieReview/`.
-
-The database settings are in `db.php`. It **auto-detects the environment**: on local
-XAMPP it uses host `localhost`, user `root`, no password and the `dbproj_movies`
-database; on the deployment server it switches to the production credentials and the
-`db202102192` database. No manual editing is needed when moving between the two.
+`db.php` auto detects the environment, so the same code works on local XAMPP and on
+the deployed server with no manual editing.
 
 ## Live deployment
 
-The site is deployed on the course server (Apache 2.4 / Ubuntu, PHP 8.2):
-
 - **URL:** `http://20.74.143.233/~u202102192/`
-- **Upload:** via SFTP to `/home/u202102192/public_html/` (NetBeans → Run As → *Remote Web Site (SFTP)*).
-- **Database:** `db202102192`, managed through phpMyAdmin at `http://20.74.143.233/phpmyadmin/`.
-- **Credentials:** the production MySQL user/password are set in `db.php` (kept out of this
-  README). They are separate from the SFTP login.
-
-To redeploy after a change: upload the changed files over SFTP, then reload the URL above.
+- **Deploy:** upload changed files over SFTP (NetBeans → Run As → *Remote Web Site*), then reload.
+- **Database:** `db202102192`, managed via phpMyAdmin.
 
 ## Demo accounts
 
-The password for **all** demo accounts is: `password`
+password for **all** accounts: `password`
 
-| Email             | Role        | Can do                                  |
-|-------------------|-------------|------------------------------------------|
-| admin@movies.com  | Admin       | Everything: moderate content, manage users, reports |
-| john@movies.com   | Creator     | Add / edit / publish their own reviews  |
-| sara@movies.com   | Creator     | Add / edit / publish their own reviews  |
-| mike@movies.com   | Viewer      | Browse, search, rate, comment           |
-| anna@movies.com   | Viewer      | Browse, search, rate, comment           |
+| Email             | Role    | Can do                                   |
+|-------------------|---------|------------------------------------------|
+| admin@movies.com  | Admin   | Manage users, content, reports; moderate comments |
+| john@movies.com   | Creator | Add / edit / publish their own reviews   |
+| sara@movies.com   | Creator | Add / edit / publish their own reviews   |
+| mike@movies.com   | Viewer  | Browse, search, rate, comment            |
+| anna@movies.com   | Viewer  | Browse, search, rate, comment            |
 
-## Where each requirement is met
+## Main features
 
-**User roles & authentication**
-- Three roles (Admin, Creator, Viewer) — `dbproj_roles`, `auth.php`
-- Sign-up / login / logout — `register.php`, `login.php`, `logout.php`
-- Sessions — `auth.php`
-- Passwords encrypted with bcrypt — `register.php` (`password_hash`), `login.php` (`password_verify`)
-- JavaScript validation — `login.php`, `register.php`, `search.php`, `create_post.php`
-- Server-side validation — every form handler
+- **Roles & auth:** Admin / Creator / Viewer, with register, login, logout and sessions. Passwords hashed with bcrypt.
+- **Home page:** newest reviews with posters, descriptions and links.
+- **Search:** live results as you type — by title, creator, genre, date range and sort, with pagination.
+- **Comments & ratings:** star ratings and comments via AJAX; admins can remove comments.
+- **Creator panel:** add, edit, publish or delete your own reviews (posters are added by image URL).
+- **Admin panel:** manage content, users, and reports (popular movies by date range, content by user).
 
-**Home page** — `index.php`: navigation, search link, newest-first list, posters, descriptions, "View Review" links.
+## Database
 
-**Search** — `search.php`: title (FULLTEXT index), date range, creator, popularity (views / rating), with live suggestions (`search_suggestions.php`) and pagination.
-
-**Comments & ratings** — `comments_section.php` + `ajax/` endpoints: star rating, comments for logged-in users, admins can remove comments, everyone can read them.
-
-**Creator panel** — `creator_dashboard.php`, `create_post.php`, `save_post.php`,
-`edit_post.php`, `update_post.php`, `delete_post.php`: add, edit, upload an image,
-save as draft, then publish, and view own content.
-
-**Admin panel** — `admin_content.php` (moderate / remove all content),
-`admin_users.php` (manage users), `admin_reports.php` (reports).
-
-**Reports** — `admin_reports.php`:
-1. Most popular movies in a date range (uses the **stored procedure**).
-2. All content created by a chosen user.
-
-**Database**
 - ERD: `finalERD.png`
-- Stored procedure: `GetPopularMoviesByDateRange` (in `database.sql`)
-- Trigger: `before_movie_update` (in `database.sql`)
-- 3 roles, 16 movies, media, ratings, comments — well above the 15-record minimum,
-  with 5 movies in the "Drama" category.
+- Stored procedure `GetPopularMoviesByDateRange` and a trigger, both in `database.sql`.
 - All tables use the `dbproj_` prefix.
 
-**Advanced features used** (more than the required 2)
-- AJAX (comments, ratings, search suggestions)
-- Prepared statements (used everywhere user input touches the database)
-- Trigger
-- Full-text indexed search
+## Notes
 
-## Note about the trailers
-The seed data uses YouTube trailer links. If any trailer ever becomes unavailable,
-just edit that movie and paste a new embed URL (format: `https://www.youtube.com/embed/VIDEO_ID`).
+- posters and trailers are stored as links. If one ever stops loading, edit the movie and paste a new URL
+  (trailer format: `https://www.youtube.com/embed/VIDEO_ID`).

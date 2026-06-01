@@ -1,5 +1,5 @@
 <?php
-// Admin page: manage the site's users (change role or delete).
+// admin page: manage the site users (change role or delete).
 require_once 'db.php';
 require_once 'auth.php';
 
@@ -7,12 +7,12 @@ requireAdmin();
 
 $currentAdminId = getCurrentUserId();
 
-// ---- Change a user's role ----
+// change user role
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_role'])) {
     $uid     = intval($_POST['user_id']);
     $roleId  = intval($_POST['role_id']);
 
-    // Only allow the three real role ids, and never let an admin change their own role
+    // only allow the three real role ids and never let an admin change their own role
     if (in_array($roleId, [1, 2, 3]) && $uid !== $currentAdminId) {
         $stmt = $conn->prepare("UPDATE dbproj_users SET role_id = ? WHERE user_id = ?");
         $stmt->bind_param("ii", $roleId, $uid);
@@ -23,10 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_role'])) {
     exit();
 }
 
-// ---- Delete a user ----
+// delete a user
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
     $uid = intval($_POST['delete_user']);
-    // An admin cannot delete their own account
+    // admin cannot delete their own account
     if ($uid !== $currentAdminId) {
         $stmt = $conn->prepare("DELETE FROM dbproj_users WHERE user_id = ?");
         $stmt->bind_param("i", $uid);
@@ -37,14 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
     exit();
 }
 
-// System message
+// system message
 $messages = [
     'role'    => 'The user role was updated.',
     'deleted' => 'The user was deleted.',
 ];
 $msg = $messages[$_GET['msg'] ?? ''] ?? '';
 
-// Load all users with their role name
+// load all users with their role name
 $users = $conn->query("
     SELECT u.user_id, u.username, u.email, u.role_id, r.role_name, u.created_at
     FROM dbproj_users u
@@ -89,7 +89,7 @@ $users = $conn->query("
                         <td><?= htmlspecialchars($u['username']) ?></td>
                         <td><?= htmlspecialchars($u['email']) ?></td>
                         <td>
-                            <!-- The role dropdown submits straight away when changed -->
+                            <!-- the role dropdown submits straight away when changed -->
                             <form method="POST" class="d-flex gap-2">
                                 <input type="hidden" name="user_id" value="<?= $u['user_id'] ?>">
                                 <select name="role_id" class="form-select form-select-sm" style="width:auto;"

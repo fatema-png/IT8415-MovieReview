@@ -1,24 +1,19 @@
 <?php
-/**
- * search_suggestions.php
- * Small AJAX endpoint for the live search box on search.php.
- * It returns a JSON list of published movie titles that match what
- * the user is typing.
- */
+
 require_once 'db.php';
 
 header('Content-Type: application/json');
 
-// What the user typed in the search box
+// what the user typed in the search box
 $q = trim($_GET['q'] ?? '');
 
-// If nothing was typed, return an empty list
+// if nothing was typed return an empty list
 if ($q === '') {
     echo json_encode([]);
     exit();
 }
 
-// Look for titles that contain the typed text (published movies only)
+// Look for titles that has the typed text published movies only
 $like = '%' . $q . '%';
 
 $stmt = $conn->prepare("

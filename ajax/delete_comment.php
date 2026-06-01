@@ -1,8 +1,7 @@
 <?php
-/**
- * ajax/delete_comment.php
- * AJAX endpoint: POST only. Admin-only. Returns JSON.
- */
+
+ //POST only. Admin-only. Returns JSON.
+
 require_once '../db.php';
 require_once '../auth.php';
 

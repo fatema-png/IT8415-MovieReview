@@ -15,9 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim($_POST['email']    ?? '');
     $password = trim($_POST['password'] ?? '');
     $confirm  = trim($_POST['confirm']  ?? '');
-    $role_id  = intval($_POST['role_id'] ?? 3); // Default: Viewer
+    $role_id  = intval($_POST['role_id'] ?? 3); // default: viewer
 
-    // Validation
+    // validation
     if (empty($username) || empty($email) || empty($password) || empty($confirm)) {
         $error = 'Please fill in all fields.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!in_array($role_id, [2, 3])) {
         $error = 'Invalid role selected.';
     } else {
-        // Check if email already exists
+        // check if email already exists
         $check = $conn->prepare("SELECT user_id FROM dbproj_users WHERE email = ?");
         $check->bind_param('s', $email);
         $check->execute();
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $check->close();
 
-        // Check if username already exists
+        // check if username already exists
         if (!$error) {
             $check2 = $conn->prepare("SELECT user_id FROM dbproj_users WHERE username = ?");
             $check2->bind_param('s', $username);
@@ -176,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script>
-    // JavaScript validation before sending the register form
+    // javascript validation before sending the register form
     const form = document.getElementById('registerForm');
     if (form) {
         form.addEventListener('submit', function (e) {

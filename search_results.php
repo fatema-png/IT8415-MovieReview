@@ -1,16 +1,9 @@
 <?php
-/**
- * search_results.php
- * Renders ONLY the search results fragment (header + cards + pagination).
- *
- * Used two ways:
- *   1) included by search.php for the initial server-side render (works without JS)
- *   2) fetched via AJAX (GET) so results can refresh live as the user types
- */
+
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth.php';
 
-// ---------- Input sanitization ----------
+// input sanitization
 $search_title   = trim($_GET['title']   ?? '');
 $search_creator = trim($_GET['creator'] ?? '');
 $date_from      = $_GET['date_from']    ?? '';
@@ -19,18 +12,18 @@ $sort_by        = in_array($_GET['sort'] ?? '', ['newest', 'oldest', 'popular', 
                     ? $_GET['sort'] : 'newest';
 $genre_id       = intval($_GET['genre'] ?? 0);
 
-// ---------- Pagination ----------
+// pagination
 $per_page    = 10;
 $page        = max(1, intval($_GET['page'] ?? 1));
 $offset      = ($page - 1) * $per_page;
 
-// ---------- Build query ----------
+// build query
 $conditions = ["m.status = 'published'"];
 $params     = [];
 $types      = '';
 
 if ($search_title !== '') {
-    // Full-text search using the ft_movie_search FULLTEXT index
+    // full text search using the fulltext index
     $conditions[] = "MATCH(m.title, m.description) AGAINST(? IN BOOLEAN MODE)";
     $params[]     = $search_title . '*';
     $types       .= 's';
@@ -69,7 +62,7 @@ $order = match ($sort_by) {
     default   => 'ORDER BY m.created_at DESC',
 };
 
-// Count total results for pagination
+// count total results for pagination
 $count_sql = "
     SELECT COUNT(DISTINCT m.movie_id) AS total
     FROM dbproj_movies m
@@ -87,7 +80,7 @@ $total_results = $count_stmt->get_result()->fetch_assoc()['total'];
 $total_pages   = ceil($total_results / $per_page);
 $count_stmt->close();
 
-// Main search query
+// main search query
 $sql = "
     SELECT
         m.movie_id,
@@ -193,10 +186,10 @@ $any_search = $search_title || $search_creator || $date_from || $date_to || $gen
     </div>
 <?php endforeach; ?>
 
-<!-- Pagination -->
+<!-- pagination -->
 <?php if ($total_pages > 1): ?>
     <?php
-    // Build pagination URL preserving all search params
+    // build pagination url preserving all search params
     $base_params = array_filter([
         'title'     => $search_title,
         'creator'   => $search_creator,

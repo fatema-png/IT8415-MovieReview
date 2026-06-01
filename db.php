@@ -1,17 +1,17 @@
 <?php
-// Detect environment: is this running on the deployment server or local XAMPP?
+// detect environment: is this running on the deployment server or local XAMPP?
 $host = $_SERVER['SERVER_ADDR'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost';
 $isLocal = in_array($host, ['127.0.0.1', '::1', 'localhost'])
         || strpos($host, 'localhost') !== false;
 
 if ($isLocal) {
-    // ---- Local development (XAMPP) ----
+    // local development (XAMPP)
     define('DB_HOST', 'localhost');
     define('DB_USER', 'root');
     define('DB_PASS', '');
     define('DB_NAME', 'dbproj_movies');
 } else {
-    // ---- Production (tutor's server) ----
+    // production (tutor server)
     define('DB_HOST', 'localhost');
     define('DB_USER', 'u202102192');
     define('DB_PASS', 'REMOVED_SEE_config.prod.php');

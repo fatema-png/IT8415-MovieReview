@@ -1,5 +1,5 @@
 <?php
-// Session helper - depends on Member 2's session structure
+// session helper
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -16,7 +16,7 @@ function isCreator() {
     return isset($_SESSION['role_id']) && $_SESSION['role_id'] == 2;
 }
 
-// A creator OR an admin is allowed to manage content
+// creator OR an admin allowed to manage content
 function canCreate() {
     return isCreator() || isAdmin();
 }
@@ -29,12 +29,12 @@ function getCurrentUsername() {
     return $_SESSION['username'] ?? 'Guest';
 }
 
-// Store a one-time message to show on the page we redirect to
+// store a one time message to show on the page we redirect to
 function setFlash($message) {
     $_SESSION['flash'] = $message;
 }
 
-// Read and clear the one-time message (returns null if none)
+// read and clear the one time message (returns null if none)
 function getFlash() {
     if (isset($_SESSION['flash'])) {
         $message = $_SESSION['flash'];
@@ -44,7 +44,7 @@ function getFlash() {
     return null;
 }
 
-// Redirect if not logged in
+// redirect if not logged in
 function requireLogin() {
     if (!isLoggedIn()) {
         setFlash('Please sign in to continue.');
@@ -53,7 +53,7 @@ function requireLogin() {
     }
 }
 
-// Redirect if not admin
+// redirect if not admin
 function requireAdmin() {
     if (!isAdmin()) {
         setFlash('Access denied: that page is for administrators only.');
@@ -62,7 +62,7 @@ function requireAdmin() {
     }
 }
 
-// Redirect if the user is not a creator or an admin
+// redirect if the user is not a creator or an admin
 function requireCreator() {
     if (!canCreate()) {
         setFlash('Access denied: that page is for content creators only.');

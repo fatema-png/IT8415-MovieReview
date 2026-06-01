@@ -1,16 +1,16 @@
 <?php
-// Creator page: shows the form to add a brand new movie review.
+// creator page: shows the form to add a brand new movie review.
 require_once 'db.php';
 require_once 'auth.php';
 
-// Only creators and admins are allowed here
+// only creators and admins are allowed here
 requireCreator();
 
-// Load the genres so the user can pick one from a dropdown
+// load the genres so the user can pick one from a dropdown
 $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY genre_name")
               ->fetch_all(MYSQLI_ASSOC);
 
-// If we came back from save_post.php with an error, show it
+// if we came back from save post php with an error show it
 $error = $_GET['error'] ?? '';
 ?>
 <!DOCTYPE html>
@@ -82,8 +82,8 @@ $error = $_GET['error'] ?? '';
                 <small class="text-secondary">Optional. Paste a direct link to an image (ending in .jpg, .png, etc.).</small>
             </div>
 
-            <!-- Two buttons: save as a draft, or publish straight away.
-                 The "action" value tells save_post.php which one was clicked. -->
+            <!-- two buttons: save as a draft or publish straight away
+                 the action value tells save post php which one was clicked -->
             <button type="submit" name="action" value="draft" class="btn btn-outline-light">
                 Save as Draft
             </button>
@@ -96,7 +96,7 @@ $error = $_GET['error'] ?? '';
 </div>
 
 <script>
-// Simple JavaScript validation before the form is sent
+// simple javascript validation before the form is sent
 document.getElementById('postForm').addEventListener('submit', function (e) {
     const title = this.title.value.trim();
     const desc  = this.description.value.trim();

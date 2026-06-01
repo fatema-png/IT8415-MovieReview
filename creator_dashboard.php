@@ -1,19 +1,19 @@
 <?php
-// Creator dashboard: shows the logged-in creator their own reviews.
+// creator dashboard: shows the logged in creator their reviews
 require_once 'db.php';
 require_once 'auth.php';
 
-// Must be a creator or admin to see this page
+// must be a creator or admin to see this page
 requireCreator();
 
 $userId = getCurrentUserId();
 
-// ---- Pagination (10 per page) ----
+// pagination (10 per page)
 $perPage = 10;
 $page    = max(1, intval($_GET['page'] ?? 1));
 $offset  = ($page - 1) * $perPage;
 
-// Count how many movies this user has, to work out the number of pages
+// count how many movies this user has to work out the number of pages
 $countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM dbproj_movies WHERE user_id = ?");
 $countStmt->bind_param("i", $userId);
 $countStmt->execute();
@@ -21,7 +21,7 @@ $totalMovies = $countStmt->get_result()->fetch_assoc()['total'];
 $countStmt->close();
 $totalPages = ceil($totalMovies / $perPage);
 
-// Get this page of the user's movies (newest first)
+// get this page of the user's movies (newest first)
 $stmt = $conn->prepare("
     SELECT m.movie_id, m.title, m.description, m.status, m.view_count, m.created_at,
            g.genre_name
@@ -36,7 +36,7 @@ $stmt->execute();
 $movies = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// A small system message after creating / updating / deleting
+// a small system message after creating or updating or deleting
 $messages = [
     'created' => 'Your review was created.',
     'updated' => 'Your review was updated.',
@@ -44,8 +44,8 @@ $messages = [
 ];
 $msg = $messages[$_GET['msg'] ?? ''] ?? '';
 
-// An optional image-upload warning passed from save_post.php / update_post.php.
-// The review itself was saved; only the poster image had a problem.
+// optional image upload warning passed from save post php / update post php
+// the review itself was saved, only the poster image had a problem.
 $imgError = trim($_GET['imgerror'] ?? '');
 ?>
 <!DOCTYPE html>
@@ -123,7 +123,7 @@ $imgError = trim($_GET['imgerror'] ?? '');
             </table>
         </div>
 
-        <!-- Pagination (only shows when there is more than one page) -->
+        <!-- pagination (only shows when there is more than one page) -->
         <?php if ($totalPages > 1): ?>
             <nav class="mt-4">
                 <ul class="pagination justify-content-center">

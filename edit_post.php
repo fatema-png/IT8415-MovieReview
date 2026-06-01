@@ -1,5 +1,5 @@
 <?php
-// Creator page: shows the form to edit an existing review.
+// creator page: shows the form to edit an existing review
 require_once 'db.php';
 require_once 'auth.php';
 
@@ -10,7 +10,7 @@ if ($movieId <= 0) {
     die("Movie ID missing.");
 }
 
-// Load the movie
+// load the movie
 $stmt = $conn->prepare("SELECT * FROM dbproj_movies WHERE movie_id = ?");
 $stmt->bind_param("i", $movieId);
 $stmt->execute();
@@ -21,16 +21,16 @@ if (!$movie) {
     die("Movie not found.");
 }
 
-// Ownership check: you can only edit your OWN movie, unless you are an admin.
+// ownership check, you can only edit your own movie, unless you are admin
 if ($movie['user_id'] != getCurrentUserId() && !isAdmin()) {
     die("You are not allowed to edit this review.");
 }
 
-// Load genres for the dropdown
+// load genres for the dropdown
 $genres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY genre_name")
               ->fetch_all(MYSQLI_ASSOC);
 
-// Load the current poster image (if there is one)
+// load the current poster image (if there is one)
 $imgStmt = $conn->prepare("
     SELECT file_path FROM dbproj_media
     WHERE movie_id = ? AND file_type = 'image' LIMIT 1
@@ -111,7 +111,7 @@ $imgStmt->close();
                     </div>
                 <?php endif; ?>
                 <?php
-                    // If the current poster is an external URL, pre-fill the URL box.
+                    // if the current poster is an external url pre fill the url box
                     $currentIsUrl = preg_match('#^https?://#i', $currentImage);
                 ?>
                 <input type="url" name="image_url" class="form-control"
@@ -120,7 +120,7 @@ $imgStmt->close();
                 <small class="text-secondary">Leave empty to keep the current image.</small>
             </div>
 
-            <!-- Update keeps the current status. Publish/Unpublish change it. -->
+            <!-- update keeps the current status. publish/unpublish change it -->
             <button type="submit" name="action" value="save" class="btn btn-main">Update</button>
             <?php if ($movie['status'] === 'draft'): ?>
                 <button type="submit" name="action" value="publish" class="btn btn-outline-light">Update &amp; Publish</button>
@@ -133,7 +133,7 @@ $imgStmt->close();
 </div>
 
 <script>
-// Simple JavaScript validation
+// simple javascript validation
 document.getElementById('postForm').addEventListener('submit', function (e) {
     if (this.title.value.trim().length < 2) {
         e.preventDefault();

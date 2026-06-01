@@ -1,12 +1,12 @@
 <?php
-// Handles the "Add New Review" form (from create_post.php).
+// handles the "Add New Review" form (from create post php)
 require_once 'db.php';
 require_once 'auth.php';
 
-// Only creators and admins can save content
+// only creators and admins can save content
 requireCreator();
 
-// This page should only be reached by submitting the form
+// this page should only be reached by submitting the form
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: create_post.php");
     exit();
@@ -20,21 +20,21 @@ $fullReview  = trim($_POST['full_review'] ?? '');
 $releaseYear = intval($_POST['release_year'] ?? 0);
 $trailerUrl  = trim($_POST['trailer_url'] ?? '');
 
-// The button the user clicked decides the status (draft or published)
+// the button the user clicked decides the status (draft or published)
 $status = ($_POST['action'] ?? 'draft') === 'publish' ? 'published' : 'draft';
 
-// ---- Server-side validation ----
+// server side validation
 if ($title === '' || $description === '' || $genreId <= 0) {
     header("Location: create_post.php?error=" . urlencode('Please fill in the title, genre and description.'));
     exit();
 }
 
-// Turn empty values into NULL so they are stored cleanly
+// turn empty values into NULL so they are stored cleanly
 $genreIdParam     = $genreId > 0 ? $genreId : null;
 $releaseYearParam = $releaseYear > 0 ? $releaseYear : null;
 $trailerUrlParam  = $trailerUrl !== '' ? $trailerUrl : null;
 
-// ---- Insert the movie ----
+// insert the movie
 $stmt = $conn->prepare("
     INSERT INTO dbproj_movies
         (user_id, genre_id, title, description, full_review, release_year, trailer_url, status)
@@ -49,10 +49,7 @@ $stmt->execute();
 $newMovieId = $conn->insert_id;
 $stmt->close();
 
-// ---- Handle the poster image (URL only) ----
-// The poster is added by pasting an image URL; it is stored as-is and used
-// directly as the <img> source. The poster is optional.
-// $imgError stays null on success; otherwise it holds a message for the dashboard.
+// 2 hours of my life wasted here
 $imgError  = null;
 $imageUrl  = trim($_POST['image_url'] ?? '');
 
@@ -73,8 +70,7 @@ if ($imageUrl !== '') {
     }
 }
 
-// The review was created either way; tell the dashboard, and pass on any
-// image problem so it can be shown as a warning.
+// the review was created either way, tell the dashboard and pass on any image problem so it can be shown as a warning
 $redirect = "creator_dashboard.php?msg=created";
 if ($imgError !== null) {
     $redirect .= "&imgerror=" . urlencode($imgError);

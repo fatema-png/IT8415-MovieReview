@@ -21,7 +21,7 @@
         </li>
 
         <?php
-        // Categories menu: list the genres so users can jump straight to a category.
+        // categories menu: list the genres so users can jump straight to a category.
         if (isset($conn)):
             $navGenres = $conn->query("SELECT genre_id, genre_name FROM dbproj_genres ORDER BY genre_name");
             if ($navGenres && $navGenres->num_rows > 0):

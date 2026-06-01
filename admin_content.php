@@ -1,14 +1,14 @@
 <?php
-// Admin page: manage ALL movie reviews on the site.
+// admin page, manage all movie reviews on the site
 require_once 'db.php';
 require_once 'auth.php';
 
-// Only admins are allowed here
+// only admins are allowed
 requireAdmin();
 
 $msg = '';
 
-// ---- Handle publish / unpublish / delete actions (POST only) ----
+// Handle publish, unpublish, delete actions (POST only)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'])) {
     $id = intval($_POST['id']);
 
@@ -32,14 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
     }
 }
 
-// System message shown after an action
+// message shown after an action
 $messages = [
     'status'  => 'The movie status was updated.',
     'deleted' => 'The movie was removed from the site.',
 ];
 $msg = $messages[$_GET['msg'] ?? ''] ?? '';
 
-// ---- Pagination (10 per page) ----
+// pagination
 $perPage = 10;
 $page    = max(1, intval($_GET['page'] ?? 1));
 $offset  = ($page - 1) * $perPage;
@@ -48,7 +48,7 @@ $totalMovies = $conn->query("SELECT COUNT(*) AS total FROM dbproj_movies")
                     ->fetch_assoc()['total'];
 $totalPages  = ceil($totalMovies / $perPage);
 
-// Get this page of movies (all creators)
+// get this page of movies (all creators)
 $stmt = $conn->prepare("
     SELECT m.movie_id, m.title, m.status, m.view_count, m.created_at,
            u.username AS creator, g.genre_name
