@@ -17,6 +17,12 @@ require_once __DIR__ . '/auth.php';
 
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
+<?php $flash = getFlash(); if ($flash): ?>
+<div class="container mt-3">
+    <div class="alert alert-danger" role="alert">⚠ <?= htmlspecialchars($flash) ?></div>
+</div>
+<?php endif; ?>
+
 <div class="container hero">
     <h1>Discover Movies, Ratings & Reviews</h1>
     <p>

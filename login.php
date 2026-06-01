@@ -8,7 +8,8 @@ if (isLoggedIn()) {
     exit();
 }
 
-$error = '';
+// Show any message set before we were redirected here (e.g. access denied)
+$error = getFlash() ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim($_POST['email']    ?? '');

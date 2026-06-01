@@ -29,9 +29,25 @@ function getCurrentUsername() {
     return $_SESSION['username'] ?? 'Guest';
 }
 
+// Store a one-time message to show on the page we redirect to
+function setFlash($message) {
+    $_SESSION['flash'] = $message;
+}
+
+// Read and clear the one-time message (returns null if none)
+function getFlash() {
+    if (isset($_SESSION['flash'])) {
+        $message = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        return $message;
+    }
+    return null;
+}
+
 // Redirect if not logged in
 function requireLogin() {
     if (!isLoggedIn()) {
+        setFlash('Please sign in to continue.');
         header("Location: login.php");
         exit();
     }
@@ -40,6 +56,7 @@ function requireLogin() {
 // Redirect if not admin
 function requireAdmin() {
     if (!isAdmin()) {
+        setFlash('Access denied: that page is for administrators only.');
         header("Location: index.php");
         exit();
     }
@@ -48,7 +65,8 @@ function requireAdmin() {
 // Redirect if the user is not a creator or an admin
 function requireCreator() {
     if (!canCreate()) {
-        header("Location: login.php");
+        setFlash('Access denied: that page is for content creators only.');
+        header("Location: " . (isLoggedIn() ? "index.php" : "login.php"));
         exit();
     }
 }
