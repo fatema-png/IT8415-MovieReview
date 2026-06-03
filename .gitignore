@@ -1,0 +1,6 @@
+# Production secrets (never commit)
+config.prod.php
+
+# Editor / IDE local files
+.vs/
+nbproject/private/

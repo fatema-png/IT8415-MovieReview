@@ -12,10 +12,9 @@ if ($isLocal) {
     define('DB_NAME', 'dbproj_movies');
 } else {
     // production (tutor server)
-    define('DB_HOST', 'localhost');
-    define('DB_USER', 'u202102192');
-    define('DB_PASS', 'REMOVED_SEE_config.prod.php');
-    define('DB_NAME', 'db202102192');
+    // Credentials live in config.prod.php, which is git-ignored and uploaded
+    // to the server separately, so they are never committed to the repo.
+    require __DIR__ . '/config.prod.php';
 }
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
